@@ -1,0 +1,60 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: epct_dev_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: epct_db
+      POSTGRES_USER: epct_user
+      POSTGRES_PASSWORD: epct_dev_pw
+    ports:
+      - "55432:5432"
+    volumes:
+      - epct_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U epct_user -d epct_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: minio/minio:latest
+    container_name: epct_dev_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: epct_admin
+      MINIO_ROOT_PASSWORD: epct_dev_pw
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - epct_minio:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  minio-init:
+    image: minio/mc:latest
+    container_name: epct_dev_minio_init
+    depends_on:
+      minio:
+        condition: service_healthy
+    entrypoint: ["/bin/sh", "/scripts/init-bucket.sh"]
+    volumes:
+      - ./docker/minio/init-bucket.sh:/scripts/init-bucket.sh:ro
+    restart: "no"
+
+  mailhog:
+    image: mailhog/mailhog:latest
+    container_name: epct_dev_mailhog
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  epct_pgdata:
+  epct_minio:
