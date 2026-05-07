@@ -20,20 +20,22 @@ export function SiteFooter() {
     <footer className="w-full border-t border-epct-green/20 bg-epct-dark text-white">
       <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-14 md:grid-cols-2 md:px-10 lg:grid-cols-4">
         <div className="lg:col-span-1">
-          <Image
-            src="/img/elite_logo.png"
-            alt="EPCT logo"
-            width={110}
-            height={36}
-            className="h-9 w-auto object-contain brightness-0 invert"
-          />
-          <p className="mt-3 max-w-xs text-sm leading-relaxed text-white/65">
+          <div className="inline-flex rounded-xl bg-white px-5 py-4">
+            <Image
+              src="/img/elite_logo_full.png"
+              alt="EPCT logo"
+              width={520}
+              height={136}
+              className="h-24 w-auto object-contain"
+            />
+          </div>
+          <p className="mt-3 max-w-xs text-base leading-relaxed text-white/70">
             Pièces pour centrales et pompes à béton en Tunisie. Disponibilité, réactivité et
             accompagnement terrain.
           </p>
           <a
             href="https://wa.me/21658348436"
-            className="mt-5 inline-flex items-center gap-2 rounded bg-epct-lime px-4 py-2 text-xs font-semibold uppercase tracking-wider text-epct-ink"
+            className="mt-5 inline-flex items-center gap-2 rounded bg-epct-lime px-4 py-2.5 text-sm font-semibold uppercase tracking-wider text-epct-ink"
           >
             WhatsApp — 58 348 436
           </a>
@@ -44,7 +46,7 @@ export function SiteFooter() {
           <ul className="space-y-2">
             {categories.map((c) => (
               <li key={c.href}>
-                <Link href={c.href} className="text-sm text-white/70 transition hover:text-white">
+                <Link href={c.href} className="text-base text-white/75 transition hover:text-white">
                   {c.label}
                 </Link>
               </li>
@@ -53,7 +55,7 @@ export function SiteFooter() {
           <p className="mb-3 mt-6 font-display text-xs uppercase tracking-[0.2em] text-epct-lime">Marques</p>
           <ul className="space-y-1.5">
             {brands.map((b) => (
-              <li key={b} className="text-sm text-white/70">
+              <li key={b} className="text-base text-white/75">
                 {b}
               </li>
             ))}
@@ -65,7 +67,7 @@ export function SiteFooter() {
           <ul className="space-y-2">
             {quickLinks.map((l) => (
               <li key={l.href}>
-                <Link href={l.href} className="text-sm text-white/70 transition hover:text-white">
+                <Link href={l.href} className="text-base text-white/75 transition hover:text-white">
                   {l.label}
                 </Link>
               </li>
@@ -75,7 +77,7 @@ export function SiteFooter() {
 
         <div>
           <p className="mb-4 font-display text-xs uppercase tracking-[0.2em] text-epct-lime">Contact</p>
-          <address className="not-italic space-y-2 text-sm text-white/70">
+          <address className="not-italic space-y-2 text-base text-white/75">
             <p>
               <span className="text-white/40 text-xs uppercase tracking-wider">Tél</span>
               <br />

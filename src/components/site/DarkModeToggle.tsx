@@ -33,9 +33,21 @@ export function DarkModeToggle() {
     <button
       onClick={toggle}
       aria-label={dark ? 'Mode clair' : 'Mode nuit'}
-      className="flex h-8 w-8 items-center justify-center rounded border border-epct-green/30 text-epct-ink/60 transition hover:border-epct-green hover:text-epct-green dark:border-epct-lime/20 dark:text-epct-dark-text/60 dark:hover:text-epct-lime"
+      className={`relative inline-flex h-9 w-[3.35rem] items-center rounded-full border px-1 transition-colors ${
+        dark
+          ? 'border-epct-lime/35 bg-epct-lime/15'
+          : 'border-epct-green/30 bg-epct-bg'
+      }`}
     >
-      {dark ? <Sun size={15} /> : <Moon size={15} />}
+      <span
+        className={`absolute top-1/2 -translate-y-1/2 transition-all duration-300 ${
+          dark ? 'left-[1.8rem]' : 'left-1'
+        }`}
+      >
+        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white text-epct-ink shadow-sm dark:bg-epct-dark-bg dark:text-epct-lime">
+          {dark ? <Sun size={14} /> : <Moon size={14} />}
+        </span>
+      </span>
     </button>
   );
 }

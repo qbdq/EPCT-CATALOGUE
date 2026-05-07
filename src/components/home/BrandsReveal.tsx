@@ -59,30 +59,44 @@ export function BrandsReveal() {
   return (
     <section className="w-full bg-white py-0">
       {/* Section header */}
-      <div className="px-6 pt-16 text-center md:px-14">
-        <p className="font-display text-xs uppercase tracking-[0.5em]" style={{ color: '#1F7A4D' }}>
+      <div className="px-6 pt-20 text-center md:px-14">
+        <p className="font-display text-sm uppercase tracking-[0.45em]" style={{ color: '#1F7A4D' }}>
           Marques partenaires
         </p>
-        <h2 className="mt-2 font-display text-4xl uppercase text-epct-dark md:text-5xl">
+        <h2 className="mt-3 font-display text-5xl font-black uppercase tracking-tight text-epct-dark md:text-6xl">
           Nos marques
         </h2>
       </div>
 
-      {/* Two-column layout: left scrolls, right sticky */}
-      <div className="mx-auto flex max-w-6xl gap-10 px-6 md:px-14 lg:gap-16">
+      {/* Two-column layout: symmetric grid */}
+      <div className="mx-auto grid w-full max-w-[1600px] grid-cols-1 px-6 md:px-12 lg:grid-cols-[2fr_3fr]">
 
-        {/* LEFT — one 100vh panel per brand */}
-        <div className="flex-1 min-w-0">
+        {/* LEFT — one panel per brand */}
+        <div>
           {brands.map((brand, i) => (
             <div
               key={brand.name}
               ref={(el) => { panelRefs.current[i] = el; }}
-              className="flex h-screen items-center"
+              className="flex min-h-[60vh] items-center py-12 lg:h-[calc(100vh-5.7rem)] lg:py-0"
             >
-              <div className="max-w-sm">
+              <div className="max-w-lg px-1">
+                {/* Mobile image (shown only on small screens) */}
+                <div className="mb-6 block lg:hidden">
+                  <div className="relative aspect-[4/3] w-full max-w-[320px] overflow-hidden rounded-2xl border border-epct-green/15 bg-gradient-to-br from-white to-epct-bg/40 shadow-lg">
+                    <Image
+                      src={brand.image}
+                      alt={brand.name}
+                      fill
+                      sizes="320px"
+                      className="object-contain p-4"
+                      priority={i === 0}
+                    />
+                  </div>
+                </div>
+
                 {/* Index number */}
                 <p
-                  className="font-display text-[4rem] font-black leading-none tracking-tighter md:text-[5rem]"
+                  className="font-display text-[3.5rem] font-black leading-none tracking-tighter sm:text-[5rem] md:text-[6.5rem]"
                   style={{ color: '#1F7A4D', opacity: i === activeIndex ? 1 : 0.18 }}
                 >
                   {String(i + 1).padStart(2, '0')}
@@ -90,7 +104,7 @@ export function BrandsReveal() {
 
                 {/* Origin pill */}
                 <span
-                  className="mt-3 inline-block rounded-full border px-4 py-1 text-xs uppercase tracking-[0.3em] transition-colors duration-300"
+                  className="mt-3 inline-block rounded-full border px-4 py-1.5 text-sm uppercase tracking-[0.26em] transition-colors duration-300"
                   style={{
                     borderColor: i === activeIndex ? 'rgba(31,122,77,0.4)' : 'rgba(0,0,0,0.12)',
                     color: i === activeIndex ? '#1F7A4D' : 'rgba(0,0,0,0.3)',
@@ -101,7 +115,7 @@ export function BrandsReveal() {
 
                 {/* Brand name */}
                 <h3
-                  className="mt-3 font-display text-5xl font-black uppercase leading-none tracking-tight transition-colors duration-300 md:text-6xl"
+                  className="mt-4 font-display text-4xl font-black uppercase leading-none tracking-tight transition-colors duration-300 sm:text-6xl md:text-8xl"
                   style={{ color: i === activeIndex ? '#1F7A4D' : 'rgba(0,0,0,0.15)' }}
                 >
                   {brand.name}
@@ -109,7 +123,7 @@ export function BrandsReveal() {
 
                 {/* Description */}
                 <p
-                  className="mt-4 text-base leading-relaxed transition-colors duration-300"
+                  className="mt-5 text-base leading-relaxed transition-colors duration-300 sm:text-lg md:text-xl"
                   style={{ color: i === activeIndex ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.2)' }}
                 >
                   {brand.specialty}
@@ -118,7 +132,7 @@ export function BrandsReveal() {
                 {/* CTA */}
                 <Link
                   href={brand.href}
-                  className="mt-6 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-semibold uppercase tracking-wider text-epct-ink transition-opacity duration-300"
+                  className="mt-7 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-wider text-epct-ink transition-opacity duration-300"
                   style={{
                     backgroundColor: '#A3E635',
                     opacity: i === activeIndex ? 1 : 0,
@@ -132,10 +146,25 @@ export function BrandsReveal() {
           ))}
         </div>
 
+        {/* Sticky dots indicator (mobile only) */}
+        <div className="fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 gap-2 rounded-full bg-white/90 px-4 py-2 shadow-lg backdrop-blur lg:hidden">
+          {brands.map((_, i) => (
+            <span
+              key={i}
+              className="block rounded-full transition-all duration-300"
+              style={{
+                width: i === activeIndex ? '1.25rem' : '0.4rem',
+                height: '0.25rem',
+                background: i === activeIndex ? '#1F7A4D' : 'rgba(0,0,0,0.2)',
+              }}
+            />
+          ))}
+        </div>
+
         {/* RIGHT — sticky image panel */}
-        <div className="hidden w-[45%] shrink-0 lg:block">
-          <div className="sticky top-0 flex h-screen items-center">
-            <div className="relative h-[420px] w-full overflow-hidden rounded-2xl">
+        <div className="hidden lg:block">
+          <div className="sticky top-[5.7rem] flex h-[calc(100vh-5.7rem)] items-center justify-center py-8">
+            <div className="relative h-[620px] w-full overflow-hidden rounded-[2.25rem] border border-epct-green/15 bg-gradient-to-br from-white to-epct-bg/40 shadow-[0_30px_65px_-28px_rgba(31,122,77,0.48)]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeIndex}
@@ -149,8 +178,8 @@ export function BrandsReveal() {
                     src={brands[activeIndex].image}
                     alt={brands[activeIndex].name}
                     fill
-                    sizes="45vw"
-                    className="object-contain drop-shadow-2xl"
+                    sizes="62vw"
+                    className="object-contain object-center drop-shadow-[0_38px_50px_rgba(15,33,22,0.26)]"
                     priority={activeIndex === 0}
                   />
                 </motion.div>
