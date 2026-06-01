@@ -68,20 +68,20 @@ export function BrandsReveal() {
         </h2>
       </div>
 
-      {/* Two-column layout: symmetric grid */}
-      <div className="mx-auto grid w-full max-w-[1600px] grid-cols-1 px-6 md:px-12 lg:grid-cols-[2fr_3fr]">
+      {/* Two-column layout: full-width asymmetric grid */}
+      <div className="grid w-full grid-cols-1 lg:grid-cols-[5fr_7fr]">
 
         {/* LEFT — one panel per brand */}
-        <div>
+        <div className="lg:pl-8 xl:pl-16">
           {brands.map((brand, i) => (
             <div
               key={brand.name}
               ref={(el) => { panelRefs.current[i] = el; }}
               className="flex min-h-[60vh] items-center py-12 lg:h-[calc(100vh-5.7rem)] lg:py-0"
             >
-              <div className="max-w-lg px-1">
+              <div className="w-full max-w-xl pr-4">
                 {/* Mobile image (shown only on small screens) */}
-                <div className="mb-6 block lg:hidden">
+                <div className="mb-6 flex justify-center lg:hidden">
                   <div className="relative aspect-[4/3] w-full max-w-[320px] overflow-hidden rounded-2xl border border-epct-green/15 bg-gradient-to-br from-white to-epct-bg/40 shadow-lg">
                     <Image
                       src={brand.image}
@@ -163,8 +163,8 @@ export function BrandsReveal() {
 
         {/* RIGHT — sticky image panel */}
         <div className="hidden lg:block">
-          <div className="sticky top-[5.7rem] flex h-[calc(100vh-5.7rem)] items-center justify-center py-8">
-            <div className="relative h-[620px] w-full overflow-hidden rounded-[2.25rem] border border-epct-green/15 bg-gradient-to-br from-white to-epct-bg/40 shadow-[0_30px_65px_-28px_rgba(31,122,77,0.48)]">
+          <div className="sticky top-[5.7rem] flex h-[calc(100vh-5.7rem)] items-center justify-center py-6 pr-8 xl:pr-14">
+            <div className="relative h-[600px] w-full overflow-hidden rounded-[2.25rem] border border-epct-green/15 bg-gradient-to-br from-white to-epct-bg/40 shadow-[0_30px_65px_-28px_rgba(31,122,77,0.48)]">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={activeIndex}

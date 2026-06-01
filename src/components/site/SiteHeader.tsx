@@ -100,7 +100,7 @@ export function SiteHeader() {
 
         {/* Mobile nav overlay */}
         {mobileMenuOpen && (
-          <nav className="absolute left-0 right-0 top-full z-50 border-b border-epct-green/15 bg-white/98 p-4 shadow-lg backdrop-blur md:hidden dark:border-epct-green/20 dark:bg-epct-dark-bg/98">
+          <nav className="absolute left-0 right-0 top-full z-50 border-b border-epct-green/15 bg-white p-4 shadow-xl md:hidden dark:border-epct-green/20 dark:bg-epct-dark-bg">
             <div className="flex flex-col gap-3">
               {navItems.map((item) => (
                 <Link
@@ -113,16 +113,16 @@ export function SiteHeader() {
                 </Link>
               ))}
               <div className="mt-2 border-t border-epct-green/10 pt-3 sm:hidden">
-                <label className="relative">
+                <label className="relative block">
                   <select
                     aria-label="Langue"
-                    className="h-9 w-full appearance-none rounded-full border border-epct-green/25 bg-transparent px-3 pr-8 text-xs font-semibold tracking-wide text-epct-ink/75 outline-none"
+                    className="h-10 w-full appearance-none rounded-lg border border-epct-green/25 bg-white px-3 pr-8 text-sm font-semibold text-epct-ink outline-none"
                     defaultValue="fr"
                   >
                     <option value="fr">🇫🇷 Français</option>
                     <option value="en">🇬🇧 English</option>
                   </select>
-                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-epct-ink/55" />
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-epct-ink/55" />
                 </label>
               </div>
             </div>
