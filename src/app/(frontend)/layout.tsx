@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import { Barlow_Condensed, Inter, JetBrains_Mono } from 'next/font/google';
+import '../globals.css';
 
 const display = Barlow_Condensed({
   subsets: ['latin'],
@@ -21,7 +22,7 @@ const mono = JetBrains_Mono({
 
 export const metadata: Metadata = {
   title: 'EPCT',
-  description: 'Pièces pour centrales et pompes à béton en Tunisie',
+  description: 'Pieces pour centrales et pompes a beton en Tunisie',
 };
 
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {

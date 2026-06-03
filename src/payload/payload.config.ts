@@ -10,10 +10,13 @@ import Media from './collections/Media.ts';
 import Categories from './collections/Categories.ts';
 import Catalogues from './collections/Catalogues.ts';
 import Brands from './collections/Brands.ts';
+import TruckCategories from './collections/TruckCategories.ts';
 import Products from './collections/Products.ts';
 import Blogs from './collections/Blogs.ts';
 import ContactSubmissions from './collections/ContactSubmissions.ts';
+import TruckModels from './collections/TruckModels.ts';
 import GlobalSettings from './globals/GlobalSettings.ts';
+import AboutPage from './globals/AboutPage.ts';
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -29,6 +32,7 @@ if (!payloadSecret) throw new Error('PAYLOAD_SECRET is required');
 
 export default buildConfig({
   admin: {
+    suppressHydrationWarning: true,
     user: Users.slug,
   },
   secret: payloadSecret,
@@ -38,8 +42,19 @@ export default buildConfig({
     },
   }),
   editor: lexicalEditor(),
-  collections: [Users, Media, Categories, Catalogues, Brands, Products, Blogs, ContactSubmissions],
-  globals: [GlobalSettings],
+  collections: [
+    Users,
+    Media,
+    Categories,
+    Catalogues,
+    Brands,
+    TruckCategories,
+    TruckModels,
+    Products,
+    Blogs,
+    ContactSubmissions,
+  ],
+  globals: [GlobalSettings, AboutPage],
   plugins: [
     s3Storage({
       collections: {

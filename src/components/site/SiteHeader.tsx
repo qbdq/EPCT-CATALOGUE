@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { ChevronDown, Menu, Search, User, X } from 'lucide-react';
-import { useState } from 'react';
+import { ChevronDown, LogOut, Menu, Search, Settings, Shield, User, X } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { NotificationsTray } from '@/components/notifications/NotificationsTray';
 
 const navItems = [
   { href: '/', label: 'Accueil' },
-  { href: '/catalogue?marques=all', label: 'Marques' },
+  { href: '/marques', label: 'Rechercheur des pieces' },
   { href: '/catalogue', label: 'Catalogue' },
   { href: '/blog', label: 'Blog' },
   { href: '/a-propos', label: 'À propos' },
@@ -16,6 +17,20 @@ const navItems = [
 
 export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    function onDocumentClick(event: MouseEvent) {
+      if (!userMenuRef.current?.contains(event.target as Node)) {
+        setUserMenuOpen(false);
+      }
+    }
+
+    document.addEventListener('mousedown', onDocumentClick);
+    return () => document.removeEventListener('mousedown', onDocumentClick);
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-epct-green/15 bg-white/95 backdrop-blur dark:border-epct-green/20 dark:bg-epct-dark-bg/95 supports-[backdrop-filter]:bg-white/85">
       <div className="mx-auto w-full max-w-7xl px-5 md:px-10">
@@ -75,13 +90,45 @@ export function SiteHeader() {
               </select>
               <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-epct-ink/55 dark:text-epct-dark-text/60" />
             </label>
-            <Link
-              href="/admin"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-epct-green/35 text-epct-dark transition hover:bg-epct-green hover:text-white dark:border-epct-lime/35 dark:text-epct-dark-text dark:hover:bg-epct-lime/20"
-              aria-label="Connexion"
-            >
-              <User size={16} />
-            </Link>
+            <NotificationsTray mode="frontend" />
+            <div className="relative" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setUserMenuOpen((current) => !current)}
+                className="flex h-9 w-9 items-center justify-center rounded-full border border-epct-green/35 text-epct-dark transition hover:bg-epct-green hover:text-white dark:border-epct-lime/35 dark:text-epct-dark-text dark:hover:bg-epct-lime/20"
+                aria-label="Compte"
+              >
+                <User size={16} />
+              </button>
+
+              {userMenuOpen ? (
+                <div className="absolute right-0 top-[calc(100%+10px)] z-50 w-56 border border-epct-ink/10 bg-white shadow-[0_18px_40px_rgba(16,24,40,0.12)]">
+                  <div className="grid">
+                    <Link
+                      href="/admin"
+                      className="flex items-center gap-3 border-b border-epct-ink/10 px-4 py-3 text-sm font-medium text-epct-dark transition hover:bg-epct-green/5"
+                    >
+                      <Shield size={15} />
+                      Panneau admin
+                    </Link>
+                    <Link
+                      href="/admin/account"
+                      className="flex items-center gap-3 border-b border-epct-ink/10 px-4 py-3 text-sm font-medium text-epct-dark transition hover:bg-epct-green/5"
+                    >
+                      <Settings size={15} />
+                      Parametres
+                    </Link>
+                    <Link
+                      href="/admin/logout"
+                      className="flex items-center gap-3 px-4 py-3 text-sm font-medium text-[#b42318] transition hover:bg-red-50"
+                    >
+                      <LogOut size={15} />
+                      Deconnexion
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
+            </div>
           </div>
         </div>
 

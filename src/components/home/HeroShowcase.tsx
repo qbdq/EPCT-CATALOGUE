@@ -34,7 +34,6 @@ export function HeroShowcase() {
     <section className="relative w-full overflow-hidden bg-epct-green px-5 py-12 text-white sm:px-5 sm:py-16 md:px-10 md:py-24">
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-[#0f5a39] via-[#1F7A4D] to-[#145e3a]" />
 
-      {/* Desktop: background image positioned right */}
       <AnimatePresence mode="wait">
         <motion.div
           key={backgrounds[activeIndex]}
@@ -49,10 +48,11 @@ export function HeroShowcase() {
           <div className="absolute -right-2 bottom-0 top-0 w-[72%] opacity-85 md:w-[66%]">
             <Image
               src={backgrounds[activeIndex]}
-              alt="Camion pompe béton"
-              fill
+              alt="Camion pompe beton"
+              width={1600}
+              height={900}
               sizes="58vw"
-              className="object-contain object-right-bottom"
+              className="h-full w-full object-contain object-right-bottom"
               priority
             />
           </div>
@@ -60,7 +60,6 @@ export function HeroShowcase() {
       </AnimatePresence>
 
       <div className="relative mx-auto flex w-full max-w-[1500px] flex-col gap-6 lg:grid lg:grid-cols-[1fr_1fr] lg:items-end lg:gap-10">
-        {/* Mobile: Image on top */}
         <div className="relative mx-auto aspect-[16/10] w-full max-w-md lg:hidden">
           <AnimatePresence mode="wait">
             <motion.div
@@ -73,22 +72,24 @@ export function HeroShowcase() {
             >
               <Image
                 src={backgrounds[activeIndex]}
-                alt="Camion pompe béton"
-                fill
+                alt="Camion pompe beton"
+                width={1600}
+                height={900}
                 sizes="(max-width: 768px) 100vw, 400px"
-                className="object-contain"
+                className="h-full w-full object-contain"
                 priority
               />
             </motion.div>
           </AnimatePresence>
         </div>
+
         <div className="rounded-2xl border border-white/15 bg-black/25 p-5 backdrop-blur-sm sm:p-6 md:p-8 lg:ml-[-3rem] lg:max-w-xl xl:ml-[-4.5rem]">
           <h1 className="max-w-3xl font-display text-[1.6rem] font-black uppercase leading-tight tracking-tight sm:text-[2.2rem] md:text-display-lg">
-            Pièces pour centrales et pompes à béton
+            Pieces pour centrales et pompes a beton
           </h1>
           <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/78 sm:text-base md:text-lg">
-            Catalogue professionnel de pièces techniques. Disponibilité, réactivité et accompagnement
-            pour vos opérations chantier.
+            Catalogue professionnel de pieces techniques. Disponibilite, reactivite et accompagnement
+            pour vos operations chantier.
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
@@ -109,23 +110,23 @@ export function HeroShowcase() {
             <p className="text-[11px] uppercase tracking-[0.3em] text-white/45">Marques disponibles</p>
             <div className="mt-4 rounded-xl border border-white/20 bg-white p-4 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.55)]">
               <div className="grid grid-cols-4 gap-x-3 sm:gap-x-5">
-              {brands.map((brand) => (
-                <div key={brand.alt} className="relative h-7 w-16 sm:h-9 sm:w-24 md:h-10 md:w-28">
-                  <Image
-                    src={brand.src}
-                    alt={brand.alt}
-                    fill
-                    sizes="120px"
-                    className="object-contain"
-                  />
-                </div>
-              ))}
+                {brands.map((brand) => (
+                  <div key={brand.alt} className="h-7 w-16 sm:h-9 sm:w-24 md:h-10 md:w-28">
+                    <Image
+                      src={brand.src}
+                      alt={brand.alt}
+                      width={240}
+                      height={120}
+                      sizes="120px"
+                      className="h-full w-full object-contain"
+                    />
+                  </div>
+                ))}
               </div>
             </div>
           </div>
         </div>
 
-        {/* Mobile slide dots */}
         <div className="flex items-center justify-center gap-2 lg:hidden">
           {backgrounds.map((bg, idx) => (
             <button
@@ -139,7 +140,6 @@ export function HeroShowcase() {
           ))}
         </div>
 
-        {/* Desktop slide dots */}
         <div className="hidden items-end justify-end lg:flex">
           <div className="flex gap-2 rounded-full border border-white/20 bg-black/25 px-3 py-2 backdrop-blur">
             {backgrounds.map((bg, idx) => (

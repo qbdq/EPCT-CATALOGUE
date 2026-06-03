@@ -8,21 +8,21 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 const slides = [
   {
     src: '/img/cifa-pump-truck.png',
-    alt: 'Pompe à béton CIFA',
-    label: 'CIFA — Pompe à béton',
-    desc: 'Matériel haute performance pour chantiers exigeants.',
+    alt: 'Pompe a beton CIFA',
+    label: 'CIFA - Pompe a beton',
+    desc: 'Materiel haute performance pour chantiers exigeants.',
   },
   {
     src: '/img/zoomlion-pump-truck.png',
     alt: 'Camion pompe Zoomlion',
-    label: 'Zoomlion — Pompe à béton',
-    desc: 'Transport et pompage du béton en continu sur site.',
+    label: 'Zoomlion - Pompe a beton',
+    desc: 'Transport et pompage du beton en continu sur site.',
   },
   {
     src: '/img/schwing-pump-truck.png',
-    alt: 'Pompe à béton Schwing',
-    label: 'Schwing — Pompe à béton',
-    desc: 'Pompe à béton de précision pour grandes hauteurs.',
+    alt: 'Pompe a beton Schwing',
+    label: 'Schwing - Pompe a beton',
+    desc: 'Pompe a beton de precision pour grandes hauteurs.',
   },
 ];
 
@@ -46,7 +46,7 @@ export function TruckSlider() {
   return (
     <div className="relative w-full overflow-hidden">
       <div className="relative flex h-[520px] w-full items-center justify-center bg-gradient-to-b from-epct-dark to-[#071a11] md:h-[620px]">
-        <div className="pointer-events-none absolute top-8 left-0 right-0 text-center z-10">
+        <div className="pointer-events-none absolute left-0 right-0 top-8 z-10 text-center">
           <p className="font-display text-2xl uppercase tracking-[0.5em] text-white/20 md:text-3xl lg:text-4xl">
             EPCT Tunisie
           </p>
@@ -64,13 +64,14 @@ export function TruckSlider() {
             transition={{ duration: 0.55, ease: [0.32, 0.72, 0, 1] }}
             className="absolute inset-0 flex flex-col items-center justify-center px-6"
           >
-            <div className="relative mx-auto h-[300px] w-full max-w-2xl drop-shadow-2xl md:h-[380px]">
+            <div className="mx-auto h-[300px] w-full max-w-2xl drop-shadow-2xl md:h-[380px]">
               <Image
                 src={slide.src}
                 alt={slide.alt}
-                fill
+                width={1600}
+                height={900}
                 sizes="(max-width: 768px) 95vw, 800px"
-                className="object-contain"
+                className="h-full w-full object-contain"
                 priority
               />
             </div>
@@ -91,7 +92,7 @@ export function TruckSlider() {
 
         <button
           onClick={() => go(-1)}
-          aria-label="Précédent"
+          aria-label="Precedent"
           className="absolute left-4 z-10 flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-black/30 text-white backdrop-blur transition hover:bg-epct-green/60"
         >
           <ChevronLeft size={20} />

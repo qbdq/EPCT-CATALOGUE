@@ -10,6 +10,8 @@ export const Categories: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'order'],
+    group: 'Catalogue',
+    description: 'Product categories used to classify spare parts and catalogue items.',
   },
   access: {
     read: publicRead,
@@ -22,12 +24,36 @@ export const Categories: CollectionConfig = {
     afterDelete: [onDocDelete],
   },
   fields: [
-    { name: 'name', type: 'text', required: true },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Main info',
+          fields: [
+            { name: 'name', type: 'text', required: true, label: 'Category name' },
+            { name: 'description', type: 'textarea', label: 'Short description' },
+            {
+              name: 'order',
+              type: 'number',
+              defaultValue: 0,
+              label: 'Display order',
+              admin: {
+                description: 'Lower numbers appear first.',
+              },
+            },
+          ],
+        },
+        {
+          label: 'Image',
+          fields: [{ name: 'icon', type: 'upload', relationTo: 'media', label: 'Category image' }],
+        },
+        {
+          label: 'SEO',
+          fields: [seoFields],
+        },
+      ],
+    },
     slugField(),
-    { name: 'description', type: 'textarea' },
-    { name: 'icon', type: 'upload', relationTo: 'media' },
-    { name: 'order', type: 'number', defaultValue: 0 },
-    seoFields,
   ],
 };
 

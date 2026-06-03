@@ -11,21 +11,21 @@ const categories = [
     number: '01',
     label: 'Toupies & Malaxeurs',
     href: '/catalogue?category=toupie',
-    desc: 'Pièces de transmission, tambour, couronne dentée et réducteurs pour toutes marques de toupies béton.',
-    parts: ['Couronnes', 'Galets porteurs', 'Réducteurs', "Joints d'étanchéité"],
+    desc: 'Pieces de transmission, tambour, couronne dentee et reducteurs pour toutes marques de toupies beton.',
+    parts: ['Couronnes', 'Galets porteurs', 'Reducteurs', "Joints d'etancheite"],
   },
   {
     number: '02',
-    label: 'Pompes à béton',
+    label: 'Pompes a beton',
     href: '/catalogue?category=pompe-beton',
-    desc: "Pistons, sphères de clapet, plaques d'usure, tubes en S et joints hydrauliques pour pompes sur camion.",
-    parts: ['Pistons hydrauliques', 'Sphères de clapet', 'Tubes en S', "Plaques d'usure"],
+    desc: "Pistons, spheres de clapet, plaques d'usure, tubes en S et joints hydrauliques pour pompes sur camion.",
+    parts: ['Pistons hydrauliques', 'Spheres de clapet', 'Tubes en S', "Plaques d'usure"],
   },
   {
     number: '03',
-    label: 'Centrales à béton',
+    label: 'Centrales a beton',
     href: '/catalogue?category=centrale-beton',
-    desc: 'Doseurs, tapis doseurs, vis sans fin, capteurs de pesage et actionneurs pour centrales à béton.',
+    desc: 'Doseurs, tapis doseurs, vis sans fin, capteurs de pesage et actionneurs pour centrales a beton.',
     parts: ['Vis sans fin', 'Tapis doseurs', 'Capteurs de pesage', 'Actionneurs'],
   },
 ];
@@ -33,15 +33,15 @@ const categories = [
 const rightPanels = [
   {
     image: '/img/segment_1.png',
-    stat: { value: '500+', label: 'Références toupies' },
+    stat: { value: '500+', label: 'References toupies' },
   },
   {
     image: '/img/segment_2.jpg',
-    stat: { value: '300+', label: 'Références pompes' },
+    stat: { value: '300+', label: 'References pompes' },
   },
   {
     image: '/img/segment_3.jpg',
-    stat: { value: '200+', label: 'Références centrales' },
+    stat: { value: '200+', label: 'References centrales' },
   },
 ];
 
@@ -53,24 +53,24 @@ export function CategoriesReveal() {
     const observers: IntersectionObserver[] = [];
     panelRefs.current.forEach((el, i) => {
       if (!el) return;
-      const obs = new IntersectionObserver(
-        ([entry]) => { if (entry.isIntersecting) setActiveIndex(i); },
-        { threshold: 0.5 },
-      );
+      const obs = new IntersectionObserver(([entry]) => {
+        if (entry.isIntersecting) setActiveIndex(i);
+      }, { threshold: 0.5 });
+
       obs.observe(el);
       observers.push(obs);
     });
+
     return () => observers.forEach((o) => o.disconnect());
   }, []);
 
   return (
     <section className="w-full bg-epct-dark py-0">
-      {/* Section header */}
       <div className="px-4 pt-12 text-center sm:px-6 md:px-14 md:pt-16">
         <p className="font-display text-xs uppercase tracking-[0.45em] sm:text-sm" style={{ color: LIME }}>
           Catalogue EPCT
         </p>
-        <h2 className="mt-2 font-display text-3xl font-black uppercase text-white sm:text-5xl sm:mt-3 md:text-6xl">
+        <h2 className="mt-2 font-display text-3xl font-black uppercase text-white sm:mt-3 sm:text-5xl md:text-6xl">
           Nos segments
         </h2>
       </div>
@@ -80,16 +80,19 @@ export function CategoriesReveal() {
           {categories.map((cat, i) => (
             <div
               key={cat.number}
-              ref={(el) => { panelRefs.current[i] = el; }}
+              ref={(el) => {
+                panelRefs.current[i] = el;
+              }}
               className="flex min-h-[70vh] items-center py-8 sm:h-screen sm:py-0"
             >
               <div className="relative h-[65vh] min-h-[480px] w-full overflow-hidden rounded-2xl border border-white/20 shadow-[0_30px_70px_-30px_rgba(0,0,0,0.65)] sm:h-[80vh] sm:min-h-[620px] sm:rounded-[2.2rem]">
                 <Image
                   src={rightPanels[i].image}
                   alt={`Segment ${cat.number}`}
-                  fill
+                  width={1600}
+                  height={1200}
                   sizes="(max-width: 1024px) 100vw, 92vw"
-                  className="object-cover"
+                  className="h-full w-full object-cover"
                   priority={i === 0}
                 />
                 <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#04170d]/90 via-[#052114]/62 to-[#04170d]/44" />
@@ -143,7 +146,7 @@ export function CategoriesReveal() {
                       href={cat.href}
                       className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#d6fb7f] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-epct-ink sm:mt-6 sm:px-6 sm:py-3 sm:text-sm"
                     >
-                      Voir les pièces →
+                      Voir les pieces →
                     </Link>
                   </div>
                 </div>

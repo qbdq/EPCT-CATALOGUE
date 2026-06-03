@@ -24,7 +24,7 @@ export function SuppliersSlider() {
       <div className="mx-auto w-full max-w-7xl">
         <p className="text-center font-display text-sm uppercase tracking-[0.4em] text-epct-green">Nos fournisseurs</p>
         <h3 className="mt-3 text-center font-display text-5xl font-black uppercase tracking-tight text-epct-dark md:text-6xl">
-          Réseau partenaires
+          Reseau partenaires
         </h3>
 
         <div className="mt-10 overflow-hidden">
@@ -36,14 +36,15 @@ export function SuppliersSlider() {
             {loopSuppliers.map((supplier, i) => (
               <div
                 key={`${supplier.name}-${i}`}
-                className="relative h-20 w-40 shrink-0 md:h-24 md:w-48 lg:h-28 lg:w-56"
+                className="h-20 w-40 shrink-0 md:h-24 md:w-48 lg:h-28 lg:w-56"
               >
                 <Image
                   src={supplier.logo}
                   alt={supplier.name}
-                  fill
+                  width={320}
+                  height={160}
                   sizes="(max-width: 768px) 160px, 220px"
-                  className="object-contain"
+                  className="h-full w-full object-contain"
                 />
               </div>
             ))}

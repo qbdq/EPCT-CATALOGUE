@@ -10,6 +10,8 @@ export const Catalogues: CollectionConfig = {
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'active', 'order'],
+    group: 'Catalogue',
+    description: 'Optional catalogue groupings used to organize downloadable or thematic product sets.',
   },
   access: {
     read: publicRead,
@@ -22,13 +24,51 @@ export const Catalogues: CollectionConfig = {
     afterDelete: [onDocDelete],
   },
   fields: [
-    { name: 'name', type: 'text', required: true },
+    {
+      type: 'tabs',
+      tabs: [
+        {
+          label: 'Main info',
+          fields: [
+            { name: 'name', type: 'text', required: true, label: 'Catalogue name' },
+            { name: 'description', type: 'textarea', label: 'Short description' },
+            {
+              type: 'row',
+              fields: [
+                {
+                  name: 'order',
+                  type: 'number',
+                  defaultValue: 0,
+                  label: 'Display order',
+                  admin: {
+                    width: '50%',
+                    description: 'Lower numbers appear first.',
+                  },
+                },
+                {
+                  name: 'active',
+                  type: 'checkbox',
+                  defaultValue: true,
+                  label: 'Visible in catalogue',
+                  admin: {
+                    width: '50%',
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        {
+          label: 'Image',
+          fields: [{ name: 'coverImage', type: 'upload', relationTo: 'media', label: 'Cover image' }],
+        },
+        {
+          label: 'SEO',
+          fields: [seoFields],
+        },
+      ],
+    },
     slugField(),
-    { name: 'description', type: 'textarea' },
-    { name: 'coverImage', type: 'upload', relationTo: 'media' },
-    { name: 'order', type: 'number', defaultValue: 0 },
-    { name: 'active', type: 'checkbox', defaultValue: true },
-    seoFields,
   ],
 };
 

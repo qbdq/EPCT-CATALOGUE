@@ -4,6 +4,10 @@ import { publicRead } from '../access/publicRead.ts';
 
 export const Media: CollectionConfig = {
   slug: 'media',
+  admin: {
+    useAsTitle: 'alt',
+    defaultColumns: ['filename', 'alt', 'updatedAt'],
+  },
   access: {
     read: publicRead,
     create: isAdmin,
@@ -12,6 +16,7 @@ export const Media: CollectionConfig = {
   },
   upload: {
     staticDir: 'media',
+    adminThumbnail: 'thumbnail',
     imageSizes: [
       {
         name: 'thumbnail',
@@ -29,13 +34,21 @@ export const Media: CollectionConfig = {
         height: 900,
       },
     ],
-    mimeTypes: ['image/*'],
+    mimeTypes: [
+      'image/jpeg',
+      'image/png',
+      'application/pdf',
+    ],
   },
   fields: [
     {
       name: 'alt',
       type: 'text',
+      label: 'Alt text',
       required: true,
+      admin: {
+        description: 'Describe the image for accessibility and search engines.',
+      },
     },
   ],
 };

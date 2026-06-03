@@ -35,6 +35,8 @@ export function SiteFooter() {
           </p>
           <a
             href="https://wa.me/21658348436"
+            target="_blank"
+            rel="noopener noreferrer"
             className="mt-5 inline-flex items-center gap-2 rounded bg-epct-lime px-4 py-2.5 text-sm font-semibold uppercase tracking-wider text-epct-ink"
           >
             WhatsApp — 58 348 436

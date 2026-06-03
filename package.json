@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "generate:types": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts payload generate:types",
+    "generate:importmap": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts payload generate:importmap",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "payload": "cross-env PAYLOAD_CONFIG_PATH=src/payload/payload.config.ts payload",
