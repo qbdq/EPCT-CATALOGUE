@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { type PublicBlog, getMediaUrl } from '@/lib/public-api';
+import { useSiteLocale } from '@/components/site/LocaleProvider';
 
 type BlogIndexClientProps = {
   posts: PublicBlog[];
@@ -12,26 +13,81 @@ type BlogIndexClientProps = {
 
 const GRID_BATCH_SIZE = 3;
 
-function formatDate(value?: string) {
-  if (!value) return '';
-
-  try {
-    return new Intl.DateTimeFormat('fr-FR', {
-      dateStyle: 'long',
-    }).format(new Date(value));
-  } catch {
-    return value;
-  }
-}
-
-function getPostTypeLabel(value?: string) {
-  if (value === 'nouveaute') return 'Nouveaute';
-  return 'Blog';
+function getDateLocale(locale: 'fr' | 'en' | 'ar') {
+  if (locale === 'en') return 'en-US';
+  if (locale === 'ar') return 'ar-TN';
+  return 'fr-FR';
 }
 
 export function BlogIndexClient({ posts }: BlogIndexClientProps) {
+  const { locale } = useSiteLocale();
   const [activeFilter, setActiveFilter] = useState<'all' | 'blog' | 'nouveaute'>('all');
   const [visibleCount, setVisibleCount] = useState(GRID_BATCH_SIZE);
+  const text = {
+    fr: {
+      all: 'Tous',
+      blog: 'Blog',
+      nouveaute: 'Nouveaute',
+      article: 'article',
+      articles: 'articles',
+      read: 'Lire',
+      none: 'Aucun article publie pour le moment.',
+      noneFilter: 'Aucun article disponible dans ce filtre.',
+      more: 'Afficher plus de blogs',
+      postTypeBlog: 'Blog',
+      postTypeNews: 'Nouveaute',
+      openArticle: 'Ouvrir',
+    },
+    en: {
+      all: 'All',
+      blog: 'Blog',
+      nouveaute: 'News',
+      article: 'article',
+      articles: 'articles',
+      read: 'Read',
+      none: 'No published article at the moment.',
+      noneFilter: 'No article available for this filter.',
+      more: 'Show more blog posts',
+      postTypeBlog: 'Blog',
+      postTypeNews: 'News',
+      openArticle: 'Open',
+    },
+    ar: {
+      all: 'الكل',
+      blog: 'مدونة',
+      nouveaute: 'مستجدات',
+      article: 'مقال',
+      articles: 'مقالات',
+      read: 'اقرأ',
+      none: 'لا توجد مقالات منشورة حاليا.',
+      noneFilter: 'لا توجد مقالات في هذا الفلتر.',
+      more: 'عرض المزيد من المقالات',
+      postTypeBlog: 'مدونة',
+      postTypeNews: 'مستجدات',
+      openArticle: 'افتح',
+    },
+  }[locale];
+
+  function formatDate(value?: string) {
+    if (!value) return '';
+
+    try {
+      return new Intl.DateTimeFormat(getDateLocale(locale), {
+        dateStyle: 'long',
+      }).format(new Date(value));
+    } catch {
+      return value;
+    }
+  }
+
+  function getPostTypeLabel(value?: string) {
+    if (value === 'nouveaute') return text.postTypeNews;
+    return text.postTypeBlog;
+  }
+
+  function getImageAlt(post: PublicBlog) {
+    return post.coverImageTitle || post.title || text.postTypeBlog;
+  }
 
   const filteredPosts = useMemo(() => {
     if (activeFilter === 'all') return posts;
@@ -51,7 +107,7 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
   if (!posts.length) {
     return (
       <div className="border border-t-0 border-dashed border-epct-green/35 bg-white px-6 py-12 text-center text-epct-ink/70">
-        Aucun article publie pour le moment.
+        {text.none}
       </div>
     );
   }
@@ -61,9 +117,9 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-epct-ink/10 pb-4">
         <div className="flex flex-wrap gap-3">
           {[
-            { value: 'all', label: 'Tous' },
-            { value: 'blog', label: 'Blog' },
-            { value: 'nouveaute', label: 'Nouveaute' },
+            { value: 'all', label: text.all },
+            { value: 'blog', label: text.blog },
+            { value: 'nouveaute', label: text.nouveaute },
           ].map((item) => {
             const isActive = activeFilter === item.value;
 
@@ -71,9 +127,7 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
               <button
                 key={item.value}
                 type="button"
-                onClick={() =>
-                  handleFilterChange(item.value as 'all' | 'blog' | 'nouveaute')
-                }
+                onClick={() => handleFilterChange(item.value as 'all' | 'blog' | 'nouveaute')}
                 className={[
                   'inline-flex min-h-11 items-center rounded-full border px-5 text-sm font-semibold uppercase tracking-[0.08em] transition',
                   isActive
@@ -88,7 +142,7 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
         </div>
 
         <p className="text-sm text-epct-ink/60">
-          {filteredPosts.length} article{filteredPosts.length > 1 ? 's' : ''}
+          {filteredPosts.length} {filteredPosts.length > 1 ? text.articles : text.article}
         </p>
       </div>
 
@@ -100,7 +154,7 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
           >
             <Image
               src={getMediaUrl(featuredPost.coverImage) || '/img/no_image.svg'}
-              alt={featuredPost.coverImageTitle || featuredPost.title}
+              alt={getImageAlt(featuredPost)}
               width={1600}
               height={900}
               className="h-full w-full object-cover transition duration-300 hover:scale-[1.02]"
@@ -126,16 +180,14 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
               </Link>
             </h2>
 
-            <p className="max-w-4xl text-[17px] leading-8 text-epct-ink/72">
-              {featuredPost.excerpt}
-            </p>
+            <p className="max-w-4xl text-[17px] leading-8 text-epct-ink/72">{featuredPost.excerpt}</p>
 
             <div>
               <Link
                 href={`/blog/${featuredPost.slug}`}
                 className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.08em] text-epct-green transition hover:translate-x-0.5"
               >
-                Lire
+                {text.read}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -149,17 +201,14 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
             const imageUrl = getMediaUrl(post.coverImage) || '/img/no_image.svg';
 
             return (
-              <article
-                key={post.id}
-                className="grid gap-0 bg-transparent transition"
-              >
+              <article key={post.id} className="grid gap-0 bg-transparent transition">
                 <Link
                   href={`/blog/${post.slug}`}
                   className="relative block aspect-[16/9] overflow-hidden bg-neutral-100"
                 >
                   <Image
                     src={imageUrl}
-                    alt={post.coverImageTitle || post.title}
+                    alt={getImageAlt(post)}
                     width={1400}
                     height={900}
                     className="h-full w-full object-cover transition duration-300 hover:scale-[1.03]"
@@ -190,10 +239,10 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
                   <div className="pt-1">
                     <Link
                       href={`/blog/${post.slug}`}
-                      aria-label={`Ouvrir ${post.title}`}
+                      aria-label={`${text.openArticle} ${post.title}`}
                       className="inline-flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.08em] text-epct-green transition hover:translate-x-0.5"
                     >
-                      Lire
+                      {text.read}
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </div>
@@ -204,7 +253,7 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
         </div>
       ) : (
         <div className="border border-dashed border-epct-green/35 bg-white px-6 py-12 text-center text-epct-ink/70">
-          Aucun article disponible dans ce filtre.
+          {text.noneFilter}
         </div>
       )}
 
@@ -215,7 +264,7 @@ export function BlogIndexClient({ posts }: BlogIndexClientProps) {
             onClick={() => setVisibleCount((current) => current + GRID_BATCH_SIZE)}
             className="inline-flex min-h-12 items-center justify-center border border-epct-ink/10 bg-white px-6 text-sm font-semibold uppercase tracking-[0.08em] text-epct-dark transition hover:border-epct-green hover:text-epct-green"
           >
-            Afficher plus de blogs
+            {text.more}
           </button>
         </div>
       ) : null}

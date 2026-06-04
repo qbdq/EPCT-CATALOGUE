@@ -7,6 +7,10 @@ import { onDocChange, onDocDelete } from '../hooks/revalidate.ts';
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
+  labels: {
+    singular: 'Categorie',
+    plural: 'Categories',
+  },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'order'],
@@ -30,8 +34,8 @@ export const Categories: CollectionConfig = {
         {
           label: 'Main info',
           fields: [
-            { name: 'name', type: 'text', required: true, label: 'Category name' },
-            { name: 'description', type: 'textarea', label: 'Short description' },
+            { name: 'name', type: 'text', required: true, localized: true, label: 'Category name' },
+            { name: 'description', type: 'textarea', localized: true, label: 'Short description' },
             {
               name: 'order',
               type: 'number',

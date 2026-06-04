@@ -6,6 +6,7 @@ export const slugField = (label = 'Slug'): Field => ({
   type: 'text',
   label,
   required: true,
+  localized: true,
   unique: true,
   index: true,
   hooks: {
@@ -13,6 +14,7 @@ export const slugField = (label = 'Slug'): Field => ({
   },
   admin: {
     position: 'sidebar',
-    description: 'Generated automatically from the name. You can adjust it only if needed.',
+    description:
+      'Generated automatically from the localized name or title, with the locale suffix added at the end.',
   },
 });

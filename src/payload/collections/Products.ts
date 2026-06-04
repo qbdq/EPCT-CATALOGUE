@@ -7,11 +7,25 @@ import { onDocChange, onDocDelete } from '../hooks/revalidate.ts';
 
 export const Products: CollectionConfig = {
   slug: 'products',
+  labels: {
+    singular: 'Produit',
+    plural: 'Produits',
+  },
   admin: {
     useAsTitle: 'name',
-    defaultColumns: ['name', 'reference', 'category', 'brand', 'truckCategory', 'truckModel', 'active', 'featured'],
+    defaultColumns: [
+      'name',
+      'reference',
+      'category',
+      'brand',
+      'truckCategory',
+      'stockStatus',
+      'active',
+      'featured',
+    ],
     group: 'Catalogue',
-    description: 'Create spare parts and connect them to the right product category, brand, truck category, and model.',
+    description:
+      'Create spare parts and connect them to the right product category, brand, truck category, and model.',
   },
   access: {
     read: publicRead,
@@ -37,6 +51,7 @@ export const Products: CollectionConfig = {
                   name: 'name',
                   type: 'text',
                   required: true,
+                  localized: true,
                   label: 'Product name',
                   admin: {
                     width: '70%',
@@ -59,6 +74,7 @@ export const Products: CollectionConfig = {
               name: 'shortDescription',
               type: 'textarea',
               required: true,
+              localized: true,
               label: 'Short description',
               admin: {
                 description: 'Quick summary shown in cards and listings.',
@@ -67,11 +83,13 @@ export const Products: CollectionConfig = {
             {
               name: 'fullDescription',
               type: 'richText',
+              localized: true,
               label: 'Detailed description',
             },
             {
               name: 'additionalInfo',
               type: 'richText',
+              localized: true,
               label: 'Additional information',
             },
           ],
@@ -93,13 +111,28 @@ export const Products: CollectionConfig = {
                   },
                 },
                 {
-                  name: 'catalogue',
-                  type: 'relationship',
-                  relationTo: 'catalogues',
-                  label: 'Catalogue group',
+                  name: 'stockStatus',
+                  type: 'select',
+                  required: true,
+                  defaultValue: 'in-stock',
+                  label: 'Availability',
                   admin: {
                     width: '50%',
                   },
+                  options: [
+                    {
+                      label: 'En stock',
+                      value: 'in-stock',
+                    },
+                    {
+                      label: 'Rupture de stock',
+                      value: 'out-of-stock',
+                    },
+                    {
+                      label: 'Sur commande',
+                      value: 'on-order',
+                    },
+                  ],
                 },
               ],
             },
@@ -110,10 +143,11 @@ export const Products: CollectionConfig = {
                   name: 'brand',
                   type: 'relationship',
                   relationTo: 'brands',
-                  required: true,
+                  hasMany: true,
                   label: 'Brand',
                   admin: {
                     width: '33%',
+                    description: 'You can select one or more compatible brands.',
                   },
                 },
                 {
@@ -131,18 +165,22 @@ export const Products: CollectionConfig = {
                   label: 'Truck model',
                   type: 'relationship',
                   relationTo: 'truck-models',
+                  hasMany: true,
                   admin: {
                     width: '34%',
-                    description: 'Filtered automatically by the selected brand and truck category.',
+                    description:
+                      'Filtered automatically by the selected brand and truck category. You can select multiple models.',
                   },
                   filterOptions: ({ siblingData }) => {
                     const values = siblingData as {
-                      brand?: string;
+                      brand?: string | string[];
                       truckCategory?: string;
                     };
-                    const filters: Record<string, { equals: string }> = {};
+                    const filters: Record<string, { equals?: string; in?: string[] }> = {};
 
-                    if (typeof values?.brand === 'string' && values.brand.length > 0) {
+                    if (Array.isArray(values?.brand) && values.brand.length > 0) {
+                      filters.brand = { in: values.brand };
+                    } else if (typeof values?.brand === 'string' && values.brand.length > 0) {
                       filters.brand = { equals: values.brand };
                     }
 
@@ -240,7 +278,7 @@ export const Products: CollectionConfig = {
         },
       ],
     },
-    slugField(),
+    slugField('Slug du produit'),
   ],
 };
 

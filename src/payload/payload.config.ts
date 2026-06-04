@@ -8,7 +8,6 @@ import { s3Storage } from '@payloadcms/storage-s3';
 import Users from './collections/Users.ts';
 import Media from './collections/Media.ts';
 import Categories from './collections/Categories.ts';
-import Catalogues from './collections/Catalogues.ts';
 import Brands from './collections/Brands.ts';
 import TruckCategories from './collections/TruckCategories.ts';
 import Products from './collections/Products.ts';
@@ -35,6 +34,25 @@ export default buildConfig({
     suppressHydrationWarning: true,
     user: Users.slug,
   },
+  localization: {
+    defaultLocale: 'fr',
+    fallback: true,
+    locales: [
+      {
+        code: 'fr',
+        label: 'Francais',
+      },
+      {
+        code: 'en',
+        label: 'English',
+      },
+      {
+        code: 'ar',
+        label: 'العربية',
+        rtl: true,
+      },
+    ],
+  },
   secret: payloadSecret,
   db: postgresAdapter({
     pool: {
@@ -46,7 +64,6 @@ export default buildConfig({
     Users,
     Media,
     Categories,
-    Catalogues,
     Brands,
     TruckCategories,
     TruckModels,

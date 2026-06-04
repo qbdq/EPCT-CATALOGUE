@@ -20,6 +20,7 @@ export type PublicBrand = {
   name: string;
   slug: string;
   description?: string;
+  badgeColor?: string;
   logo?: MediaDoc | string | null;
   featuredImage?: MediaDoc | string | null;
 };
@@ -30,6 +31,13 @@ export type PublicTruckCategory = {
   slug: string;
   description?: string;
   image?: MediaDoc | string | null;
+};
+
+export type PublicCategory = {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string;
 };
 
 export type PublicTruckModel = {
@@ -48,10 +56,23 @@ export type PublicProduct = {
   slug: string;
   shortDescription: string;
   reference: string;
+  fullDescription?: unknown;
+  additionalInfo?: unknown;
   featured?: boolean;
-  brand?: RelationDoc | string | null;
+  active?: boolean;
+  stockStatus?: 'in-stock' | 'out-of-stock' | 'on-order' | string;
+  brand?: RelationDoc | string | Array<RelationDoc | string> | null;
+  category?: RelationDoc | string | null;
   truckCategory?: RelationDoc | string | null;
-  truckModel?: RelationDoc | string | null;
+  truckModel?: RelationDoc | string | Array<RelationDoc | string> | null;
+  images?: Array<{
+    image?: MediaDoc | string | null;
+    alt?: string;
+  }>;
+  sizes?: Array<{
+    label?: string;
+    value?: string;
+  }>;
 };
 
 export type PublicBlog = {
@@ -108,13 +129,22 @@ export type PublicGlobalSettings = {
   address?: string;
   facebook?: string;
   tiktok?: string;
+  cataloguePDFs?: Array<{
+    file?: MediaDoc | string | null;
+    title?: string;
+  }>;
 };
 
 export type ProductFilters = {
-  brand?: string;
-  category?: string;
-  model?: string;
+  brands?: string[];
+  productCategories?: string[];
+  categories?: string[];
+  models?: string[];
+  stockStatuses?: string[];
+  query?: string;
 };
+
+export type PublicLocale = 'fr' | 'en' | 'ar';
 
 function getSiteURL() {
   return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -143,11 +173,34 @@ async function fetchPayloadGlobal<T>(path: string): Promise<T | null> {
   return (await res.json()) as T;
 }
 
+function withLocale(path: string, locale?: PublicLocale) {
+  if (!locale) return path;
+  const separator = path.includes('?') ? '&' : '?';
+  return `${path}${separator}locale=${locale}`;
+}
+
 function relationMatches(relation: RelationDoc | string | null | undefined, slug?: string) {
   if (!slug) return true;
   if (!relation) return false;
   if (typeof relation === 'string') return relation === slug;
   return relation.slug === slug || relation.id === slug;
+}
+
+function relationMatchesAny(
+  relation: RelationDoc | string | Array<RelationDoc | string> | null | undefined,
+  slugs?: string[],
+) {
+  if (!slugs?.length) return true;
+  if (!relation) return false;
+
+  const relationValues = Array.isArray(relation) ? relation : [relation];
+
+  return slugs.some((slug) =>
+    relationValues.some((value) => {
+      if (typeof value === 'string') return value === slug;
+      return value.slug === slug || value.id === slug;
+    }),
+  );
 }
 
 export function getMediaUrl(media?: MediaDoc | string | null) {
@@ -165,56 +218,90 @@ export function getMediaUrl(media?: MediaDoc | string | null) {
   return null;
 }
 
-export async function getPublicBrands(): Promise<PublicBrand[]> {
-  return fetchPayloadList<PublicBrand>('/api/brands?limit=100&sort=name&depth=1');
+export async function getPublicBrands(locale?: PublicLocale): Promise<PublicBrand[]> {
+  return fetchPayloadList<PublicBrand>(withLocale('/api/brands?limit=100&sort=name&depth=1', locale));
 }
 
-export async function getPublicTruckCategories(): Promise<PublicTruckCategory[]> {
-  return fetchPayloadList<PublicTruckCategory>('/api/truck-categories?limit=100&sort=name&depth=1');
+export async function getPublicTruckCategories(locale?: PublicLocale): Promise<PublicTruckCategory[]> {
+  return fetchPayloadList<PublicTruckCategory>(
+    withLocale('/api/truck-categories?limit=100&sort=name&depth=1', locale),
+  );
 }
 
-export async function getPublicTruckModels(): Promise<PublicTruckModel[]> {
-  return fetchPayloadList<PublicTruckModel>('/api/truck-models?limit=200&sort=name&depth=1');
+export async function getPublicCategories(locale?: PublicLocale): Promise<PublicCategory[]> {
+  return fetchPayloadList<PublicCategory>(withLocale('/api/categories?limit=100&sort=name&depth=1', locale));
 }
 
-export async function getPublicProducts(filters: ProductFilters = {}): Promise<PublicProduct[]> {
+export async function getPublicTruckModels(locale?: PublicLocale): Promise<PublicTruckModel[]> {
+  return fetchPayloadList<PublicTruckModel>(withLocale('/api/truck-models?limit=200&sort=name&depth=1', locale));
+}
+
+export async function getPublicProducts(
+  filters: ProductFilters = {},
+  locale?: PublicLocale,
+): Promise<PublicProduct[]> {
   const products = await fetchPayloadList<PublicProduct>(
-    '/api/products?limit=200&sort=-featured,-updatedAt&depth=1',
+    withLocale('/api/products?limit=200&sort=-featured,-updatedAt&depth=1', locale),
   );
 
   return products.filter((product) => {
-    const matchesBrand = relationMatches(product.brand, filters.brand);
-    const matchesCategory = relationMatches(product.truckCategory, filters.category);
-    const matchesModel = relationMatches(product.truckModel, filters.model);
+    const isActive = product.active !== false;
+    const matchesBrand = relationMatchesAny(product.brand, filters.brands);
+    const matchesProductCategory = relationMatchesAny(product.category, filters.productCategories);
+    const matchesCategory = relationMatchesAny(product.truckCategory, filters.categories);
+    const matchesModel = relationMatchesAny(product.truckModel, filters.models);
+    const matchesStock =
+      !filters.stockStatuses?.length ||
+      (!!product.stockStatus && filters.stockStatuses.includes(product.stockStatus));
+    const query = filters.query?.trim().toLowerCase();
+    const haystack = [
+      product.name,
+      product.shortDescription,
+      product.reference,
+      product.fullDescription ? JSON.stringify(product.fullDescription) : '',
+      product.additionalInfo ? JSON.stringify(product.additionalInfo) : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .toLowerCase();
+    const matchesQuery = !query || haystack.includes(query);
 
-    return matchesBrand && matchesCategory && matchesModel;
+    return (
+      isActive &&
+      matchesBrand &&
+      matchesProductCategory &&
+      matchesCategory &&
+      matchesModel &&
+      matchesStock &&
+      matchesQuery
+    );
   });
 }
 
-export async function getPublicProductBySlug(slug: string): Promise<PublicProduct | null> {
+export async function getPublicProductBySlug(slug: string, locale?: PublicLocale): Promise<PublicProduct | null> {
   const products = await fetchPayloadList<PublicProduct>(
-    `/api/products?where[slug][equals]=${encodeURIComponent(slug)}&limit=1&depth=1`,
+    withLocale(`/api/products?where[slug][equals]=${encodeURIComponent(slug)}&limit=1&depth=1`, locale),
   );
 
   return products[0] ?? null;
 }
 
-export async function getPublicBlogs(): Promise<PublicBlog[]> {
-  return fetchPayloadList<PublicBlog>('/api/blogs?limit=24&sort=-publishedAt&depth=2');
+export async function getPublicBlogs(locale?: PublicLocale): Promise<PublicBlog[]> {
+  return fetchPayloadList<PublicBlog>(withLocale('/api/blogs?limit=24&sort=-publishedAt&depth=2', locale));
 }
 
-export async function getPublicBlogBySlug(slug: string): Promise<PublicBlog | null> {
+export async function getPublicBlogBySlug(slug: string, locale?: PublicLocale): Promise<PublicBlog | null> {
   const blogs = await fetchPayloadList<PublicBlog>(
-    `/api/blogs?where[slug][equals]=${encodeURIComponent(slug)}&limit=1&depth=2`,
+    withLocale(`/api/blogs?where[slug][equals]=${encodeURIComponent(slug)}&limit=1&depth=2`, locale),
   );
 
   return blogs[0] ?? null;
 }
 
-export async function getPublicAboutPage(): Promise<PublicAboutPage | null> {
-  return fetchPayloadGlobal<PublicAboutPage>('/api/globals/about-page?depth=2');
+export async function getPublicAboutPage(locale?: PublicLocale): Promise<PublicAboutPage | null> {
+  return fetchPayloadGlobal<PublicAboutPage>(withLocale('/api/globals/about-page?depth=2', locale));
 }
 
-export async function getPublicGlobalSettings(): Promise<PublicGlobalSettings | null> {
-  return fetchPayloadGlobal<PublicGlobalSettings>('/api/globals/global-settings');
+export async function getPublicGlobalSettings(locale?: PublicLocale): Promise<PublicGlobalSettings | null> {
+  return fetchPayloadGlobal<PublicGlobalSettings>(withLocale('/api/globals/global-settings', locale));
 }

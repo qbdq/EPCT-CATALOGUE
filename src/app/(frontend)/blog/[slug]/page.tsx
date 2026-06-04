@@ -1,16 +1,24 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, Mail, MapPinned, MessageCircle, Music2 } from 'lucide-react';
 import { BlogRichText } from '@/components/blog/BlogRichText';
 import { SiteShell } from '@/components/site/SiteShell';
-import { getMediaUrl, getPublicBlogBySlug, getPublicGlobalSettings } from '@/lib/public-api';
+import {
+  getMediaUrl,
+  getPublicBlogBySlug,
+  getPublicBlogs,
+  getPublicGlobalSettings,
+  type PublicLocale,
+} from '@/lib/public-api';
 
-function formatDate(value?: string) {
+function formatDate(value: string | undefined, locale: PublicLocale) {
   if (!value) return '';
 
   try {
-    return new Intl.DateTimeFormat('fr-FR', {
+    const formatLocale = locale === 'en' ? 'en-US' : locale === 'ar' ? 'ar-TN' : 'fr-FR';
+    return new Intl.DateTimeFormat(formatLocale, {
       dateStyle: 'long',
     }).format(new Date(value));
   } catch {
@@ -20,14 +28,12 @@ function formatDate(value?: string) {
 
 export default async function BlogDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const [{ getPublicBlogs }, { getMediaUrl, getPublicBlogBySlug, getPublicGlobalSettings }] = await Promise.all([
-    import('@/lib/public-api'),
-    import('@/lib/public-api'),
-  ]);
+  const locale = (((await cookies()).get('site-locale')?.value as PublicLocale | undefined) ?? 'fr');
+
   const [post, globalSettings, allPosts] = await Promise.all([
-    getPublicBlogBySlug(slug),
-    getPublicGlobalSettings(),
-    getPublicBlogs(),
+    getPublicBlogBySlug(slug, locale),
+    getPublicGlobalSettings(locale),
+    getPublicBlogs(locale),
   ]);
 
   if (!post) notFound();
@@ -57,6 +63,51 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
   const previousPost = currentIndex >= 0 ? allPosts[currentIndex + 1] ?? null : null;
   const nextPost = currentIndex > 0 ? allPosts[currentIndex - 1] ?? null : null;
 
+  const copy = {
+    fr: {
+      back: 'Retour aux articles',
+      previous: 'Article precedent',
+      next: 'Article suivant',
+      gallery: "Images liees a l'article",
+      contact: 'Nous contacter',
+      similar: 'Articles similaires',
+      readArticle: "Lire l'article",
+      googleLabel: 'Google Maps',
+      facebookLabel: 'Facebook',
+      tiktokLabel: 'TikTok',
+      whatsappLabel: 'WhatsApp',
+      emailLabel: 'Email',
+    },
+    en: {
+      back: 'Back to articles',
+      previous: 'Previous article',
+      next: 'Next article',
+      gallery: 'Images related to this article',
+      contact: 'Contact us',
+      similar: 'Similar articles',
+      readArticle: 'Read article',
+      googleLabel: 'Google Maps',
+      facebookLabel: 'Facebook',
+      tiktokLabel: 'TikTok',
+      whatsappLabel: 'WhatsApp',
+      emailLabel: 'Email',
+    },
+    ar: {
+      back: 'العودة الى المقالات',
+      previous: 'المقال السابق',
+      next: 'المقال التالي',
+      gallery: 'صور مرتبطة بهذا المقال',
+      contact: 'اتصل بنا',
+      similar: 'مقالات مشابهة',
+      readArticle: 'اقرأ المقال',
+      googleLabel: 'خرائط غوغل',
+      facebookLabel: 'فيسبوك',
+      tiktokLabel: 'تيك توك',
+      whatsappLabel: 'واتساب',
+      emailLabel: 'البريد',
+    },
+  }[locale];
+
   return (
     <SiteShell>
       <main className="bg-[#f3f4f2] px-0 pb-16 pt-0 md:pb-20">
@@ -68,7 +119,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                 className="inline-flex min-h-12 items-center gap-2 border border-epct-ink/10 bg-white px-5 text-sm font-semibold uppercase tracking-[0.08em] text-epct-dark transition hover:border-epct-green hover:text-epct-green"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Retour aux articles
+                {copy.back}
               </Link>
 
               <div className="flex flex-wrap items-center gap-3">
@@ -78,7 +129,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                     className="inline-flex min-h-11 items-center gap-2 border border-epct-ink/10 bg-white px-4 text-sm font-semibold text-epct-dark transition hover:border-epct-green hover:text-epct-green"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    Article precedent
+                    {copy.previous}
                   </Link>
                 ) : null}
 
@@ -87,7 +138,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                     href={`/blog/${nextPost.slug}`}
                     className="inline-flex min-h-11 items-center gap-2 border border-epct-ink/10 bg-white px-4 text-sm font-semibold text-epct-dark transition hover:border-epct-green hover:text-epct-green"
                   >
-                    Article suivant
+                    {copy.next}
                     <ArrowLeft className="h-4 w-4 rotate-180" />
                   </Link>
                 ) : null}
@@ -112,7 +163,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                 ) : null}
 
                 <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-[11px] font-medium uppercase tracking-[0.08em] text-epct-ink/45">
-                  {post.publishedAt ? <span>{formatDate(post.publishedAt)}</span> : null}
+                  {post.publishedAt ? <span>{formatDate(post.publishedAt, locale)}</span> : null}
                   {post.author ? <span>{post.author}</span> : null}
                 </div>
 
@@ -147,7 +198,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                 <section className="grid gap-6">
                   <div className="max-w-3xl">
                     <p className="font-display text-2xl uppercase text-epct-green md:text-3xl">
-                      Images liees a l'article
+                      {copy.gallery}
                     </p>
                   </div>
 
@@ -183,7 +234,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex h-11 w-11 items-center justify-center border border-epct-ink/10 bg-white text-epct-dark transition hover:border-epct-green hover:text-epct-green"
-                      aria-label="Google Maps"
+                      aria-label={copy.googleLabel}
                     >
                       <MapPinned className="h-5 w-5" />
                     </a>
@@ -192,7 +243,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex h-11 w-11 items-center justify-center border border-epct-ink/10 bg-white text-epct-dark transition hover:border-epct-green hover:text-epct-green"
-                      aria-label="Facebook"
+                      aria-label={copy.facebookLabel}
                     >
                       <span className="text-lg font-bold leading-none">f</span>
                     </a>
@@ -201,7 +252,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex h-11 w-11 items-center justify-center border border-epct-ink/10 bg-white text-epct-dark transition hover:border-epct-green hover:text-epct-green"
-                      aria-label="TikTok"
+                      aria-label={copy.tiktokLabel}
                     >
                       <Music2 className="h-5 w-5" />
                     </a>
@@ -210,14 +261,14 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex h-11 w-11 items-center justify-center border border-epct-ink/10 bg-white text-epct-dark transition hover:border-epct-green hover:text-epct-green"
-                      aria-label="WhatsApp"
+                      aria-label={copy.whatsappLabel}
                     >
                       <MessageCircle className="h-5 w-5" />
                     </a>
                     <a
                       href={emailUrl}
                       className="inline-flex h-11 w-11 items-center justify-center border border-epct-ink/10 bg-white text-epct-dark transition hover:border-epct-green hover:text-epct-green"
-                      aria-label="Email"
+                      aria-label={copy.emailLabel}
                     >
                       <Mail className="h-5 w-5" />
                     </a>
@@ -227,7 +278,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                     href="/contact"
                     className="inline-flex min-h-12 items-center justify-center bg-epct-green px-5 text-sm font-semibold text-white transition hover:brightness-95"
                   >
-                    Nous contacter
+                    {copy.contact}
                   </Link>
                 </div>
               </div>
@@ -236,7 +287,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                 <section className="grid gap-6 border-t border-epct-ink/10 pt-6">
                   <div className="max-w-3xl">
                     <p className="font-display text-2xl uppercase text-epct-dark md:text-3xl">
-                      Articles similaires
+                      {copy.similar}
                     </p>
                   </div>
 
@@ -260,7 +311,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                             <div className="text-sm text-epct-ink/60">
                               {item.author ? <span>{item.author}</span> : null}
                               {item.author && item.publishedAt ? <span> · </span> : null}
-                              {item.publishedAt ? <span>{formatDate(item.publishedAt)}</span> : null}
+                              {item.publishedAt ? <span>{formatDate(item.publishedAt, locale)}</span> : null}
                             </div>
                             <p className="font-display text-xl uppercase text-epct-dark">{item.title}</p>
                             {item.excerpt ? (
@@ -271,7 +322,7 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
                                 href={`/blog/${item.slug}`}
                                 className="inline-flex min-h-10 items-center justify-center bg-epct-green px-4 text-sm font-semibold text-white transition hover:brightness-95"
                               >
-                                Lire l'article
+                                {copy.readArticle}
                               </Link>
                             </div>
                           </div>
@@ -284,7 +335,6 @@ export default async function BlogDetailPage({ params }: { params: Promise<{ slu
             </article>
           </div>
         </div>
-
       </main>
     </SiteShell>
   );

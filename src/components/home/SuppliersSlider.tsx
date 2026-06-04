@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Image from 'next/image';
+import { useSiteLocale } from '@/components/site/LocaleProvider';
 
 const suppliers = [
   { name: 'CIFA', logo: '/img/brands/cifa-logo.webp' },
@@ -17,14 +18,31 @@ const suppliers = [
 ];
 
 export function SuppliersSlider() {
+  const { locale } = useSiteLocale();
   const loopSuppliers = [...suppliers, ...suppliers];
+  const copy = {
+    fr: {
+      eyebrow: 'Nos fournisseurs',
+      title: 'Reseau partenaires',
+    },
+    en: {
+      eyebrow: 'Our suppliers',
+      title: 'Partner network',
+    },
+    ar: {
+      eyebrow: 'مزودونا',
+      title: 'شبكة الشركاء',
+    },
+  }[locale];
 
   return (
     <section className="w-full bg-white px-5 pb-20 pt-16 md:px-10">
       <div className="mx-auto w-full max-w-7xl">
-        <p className="text-center font-display text-sm uppercase tracking-[0.4em] text-epct-green">Nos fournisseurs</p>
+        <p className="text-center font-display text-sm uppercase tracking-[0.4em] text-epct-green">
+          {copy.eyebrow}
+        </p>
         <h3 className="mt-3 text-center font-display text-5xl font-black uppercase tracking-tight text-epct-dark md:text-6xl">
-          Reseau partenaires
+          {copy.title}
         </h3>
 
         <div className="mt-10 overflow-hidden">

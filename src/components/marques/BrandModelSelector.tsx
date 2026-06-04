@@ -3,14 +3,9 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo, useState } from 'react';
-import type {
-  PublicBrand,
-  PublicTruckCategory,
-  PublicTruckModel,
-} from '@/lib/public-api';
-import {
-  getMediaUrl,
-} from '@/lib/public-api';
+import { useSiteLocale } from '@/components/site/LocaleProvider';
+import type { PublicBrand, PublicTruckCategory, PublicTruckModel } from '@/lib/public-api';
+import { getMediaUrl } from '@/lib/public-api';
 
 type BrandModelSelectorProps = {
   brands: PublicBrand[];
@@ -27,30 +22,13 @@ type Step = {
 
 type SlugRelation = string | { slug?: string | null } | null | undefined;
 
-const steps: Step[] = [
-  {
-    key: 'brand',
-    label: 'Marque',
-    title: 'Choisissez une marque',
-    description: 'Commencez par la marque de votre equipement.',
-  },
-  {
-    key: 'category',
-    label: 'Categorie camion',
-    title: 'Choisissez une categorie camion',
-    description: 'Affinez la recherche avec le type d equipement.',
-  },
-  {
-    key: 'model',
-    label: 'Modele',
-    title: 'Choisissez le modele exact',
-    description: 'Selectionnez le modele pour ouvrir le catalogue filtre.',
-  },
-];
-
 function getRelationSlug(value: SlugRelation) {
   if (!value || typeof value === 'string') return null;
   return value.slug ?? null;
+}
+
+function getEntityImageAlt(name: string | undefined, fallback: string) {
+  return name?.trim() || fallback;
 }
 
 export function BrandModelSelector({
@@ -58,8 +36,101 @@ export function BrandModelSelector({
   truckCategories,
   truckModels,
 }: BrandModelSelectorProps) {
+  const { locale } = useSiteLocale();
   const [selectedBrandSlug, setSelectedBrandSlug] = useState<string | null>(null);
   const [selectedTruckCategorySlug, setSelectedTruckCategorySlug] = useState<string | null>(null);
+
+  const text = {
+    fr: {
+      step: 'Etape',
+      steps: [
+        {
+          key: 'brand',
+          label: 'Marque',
+          title: 'Choisissez une marque',
+          description: 'Commencez par la marque de votre equipement.',
+        },
+        {
+          key: 'category',
+          label: 'Categorie camion',
+          title: 'Choisissez une categorie camion',
+          description: 'Affinez la recherche avec le type d equipement.',
+        },
+        {
+          key: 'model',
+          label: 'Modele',
+          title: 'Choisissez le modele exact',
+          description: 'Selectionnez le modele pour ouvrir le catalogue filtre.',
+        },
+      ] satisfies Step[],
+      chosenBrand: 'Marque selectionnee',
+      chosenCategory: 'Categorie selectionnee',
+      reset: 'Reinitialiser',
+      backCategories: 'Retour categories',
+      noTruckType: 'Aucun type de camion n est encore relie a la marque',
+      noModel: 'Aucun modele n est encore relie a la categorie',
+    },
+    en: {
+      step: 'Step',
+      steps: [
+        {
+          key: 'brand',
+          label: 'Brand',
+          title: 'Choose a brand',
+          description: 'Start with your equipment brand.',
+        },
+        {
+          key: 'category',
+          label: 'Truck category',
+          title: 'Choose a truck category',
+          description: 'Refine the search with the equipment type.',
+        },
+        {
+          key: 'model',
+          label: 'Model',
+          title: 'Choose the exact model',
+          description: 'Select the model to open the filtered catalogue.',
+        },
+      ] satisfies Step[],
+      chosenBrand: 'Selected brand',
+      chosenCategory: 'Selected category',
+      reset: 'Reset',
+      backCategories: 'Back to categories',
+      noTruckType: 'No truck type is linked yet to the brand',
+      noModel: 'No model is linked yet to the category',
+    },
+    ar: {
+      step: 'المرحلة',
+      steps: [
+        {
+          key: 'brand',
+          label: 'العلامة',
+          title: 'اختر العلامة',
+          description: 'ابدأ بعلامة معدتك.',
+        },
+        {
+          key: 'category',
+          label: 'فئة الشاحنة',
+          title: 'اختر فئة الشاحنة',
+          description: 'قم بتضييق البحث حسب نوع المعدة.',
+        },
+        {
+          key: 'model',
+          label: 'الموديل',
+          title: 'اختر الموديل المناسب',
+          description: 'حدد الموديل لفتح الكتالوج المفلتر.',
+        },
+      ] satisfies Step[],
+      chosenBrand: 'العلامة المختارة',
+      chosenCategory: 'الفئة المختارة',
+      reset: 'اعادة التعيين',
+      backCategories: 'العودة الى الفئات',
+      noTruckType: 'لا يوجد نوع شاحنة مرتبط بعد بهذه العلامة',
+      noModel: 'لا يوجد موديل مرتبط بعد بهذه الفئة',
+    },
+  }[locale];
+
+  const steps = text.steps;
 
   const selectedBrand = useMemo(
     () => brands.find((brand) => brand.slug === selectedBrandSlug) ?? null,
@@ -131,7 +202,7 @@ export function BrandModelSelector({
                     />
                   </div>
                   <p className="mt-3 font-display text-sm uppercase tracking-[0.16em] text-epct-ink/55">
-                    Etape {index + 1}
+                    {text.step} {index + 1}
                   </p>
                   <p className="mt-1 font-display text-lg uppercase text-epct-dark">{step.label}</p>
                 </div>
@@ -153,7 +224,7 @@ export function BrandModelSelector({
               {selectedBrand ? (
                 <div className="min-w-[220px] border border-epct-red/20 bg-epct-red/5 px-4 py-3">
                   <p className="font-display text-xs uppercase tracking-[0.18em] text-epct-ink/55">
-                    Marque selectionnee
+                    {text.chosenBrand}
                   </p>
                   <p className="mt-1 font-display text-lg uppercase text-epct-dark">
                     {selectedBrand.name}
@@ -164,7 +235,7 @@ export function BrandModelSelector({
               {selectedTruckCategory ? (
                 <div className="min-w-[220px] border border-epct-green/25 bg-epct-green/5 px-4 py-3">
                   <p className="font-display text-xs uppercase tracking-[0.18em] text-epct-ink/55">
-                    Categorie selectionnee
+                    {text.chosenCategory}
                   </p>
                   <p className="mt-1 font-display text-lg uppercase text-epct-dark">
                     {selectedTruckCategory.name}
@@ -181,7 +252,7 @@ export function BrandModelSelector({
                 onClick={() => setSelectedTruckCategorySlug(null)}
                 className="inline-flex min-h-12 items-center justify-center border border-epct-green bg-epct-green px-5 font-display text-sm uppercase tracking-[0.14em] text-white shadow-[0_10px_24px_rgba(12,122,89,0.18)] transition hover:brightness-95"
               >
-                Retour categories
+                {text.backCategories}
               </button>
             ) : null}
 
@@ -193,7 +264,7 @@ export function BrandModelSelector({
               }}
               className="inline-flex min-h-12 items-center justify-center border border-epct-red bg-white px-5 font-display text-sm uppercase tracking-[0.14em] text-epct-red shadow-[0_10px_24px_rgba(227,28,37,0.08)] transition hover:bg-epct-red hover:text-white"
             >
-              Reinitialiser
+              {text.reset}
             </button>
           </div>
         </div>
@@ -217,7 +288,7 @@ export function BrandModelSelector({
                       {imageUrl ? (
                         <Image
                           src={imageUrl}
-                          alt={brand.name}
+                          alt={getEntityImageAlt(brand.name, 'Brand image')}
                           width={1200}
                           height={750}
                           className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
@@ -258,7 +329,7 @@ export function BrandModelSelector({
                         {imageUrl ? (
                           <Image
                             src={imageUrl}
-                            alt={category.name}
+                            alt={getEntityImageAlt(category.name, 'Truck category image')}
                             width={1200}
                             height={750}
                             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
@@ -281,7 +352,7 @@ export function BrandModelSelector({
             </div>
           ) : (
             <div className="border border-dashed border-epct-green/35 px-6 py-10 text-epct-ink/70">
-              Aucun type de camion n est encore relie a la marque <strong>{selectedBrand?.name}</strong>.
+              {text.noTruckType} <strong>{selectedBrand?.name}</strong>.
             </div>
           )
         ) : null}
@@ -300,7 +371,7 @@ export function BrandModelSelector({
                         {imageUrl ? (
                           <Image
                             src={imageUrl}
-                            alt={model.name}
+                            alt={getEntityImageAlt(model.name, 'Truck model image')}
                             width={1200}
                             height={750}
                             className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
@@ -323,7 +394,7 @@ export function BrandModelSelector({
             </div>
           ) : (
             <div className="border border-dashed border-epct-green/35 px-6 py-10 text-epct-ink/70">
-              Aucun modele n est encore relie a la categorie <strong>{selectedTruckCategory?.name}</strong>.
+              {text.noModel} <strong>{selectedTruckCategory?.name}</strong>.
             </div>
           )
         ) : null}

@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { AnimatePresence, motion } from 'framer-motion';
+import { useSiteLocale } from '@/components/site/LocaleProvider';
 
 const backgrounds = [
   '/img/slider_home_1.png',
@@ -21,6 +22,34 @@ const brands = [
 
 export function HeroShowcase() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const { locale } = useSiteLocale();
+
+  const copy = {
+    fr: {
+      title: 'Pieces pour centrales et pompes a beton',
+      text: 'Catalogue professionnel de pieces techniques. Disponibilite, reactivite et accompagnement pour vos operations chantier.',
+      catalogue: 'Voir le catalogue',
+      quote: 'Demander un devis',
+      brands: 'Marques disponibles',
+      alt: 'Camion pompe beton',
+    },
+    en: {
+      title: 'Parts for batching plants and concrete pumps',
+      text: 'Professional catalogue of technical spare parts. Availability, responsiveness and support for your worksite operations.',
+      catalogue: 'View catalogue',
+      quote: 'Request a quote',
+      brands: 'Available brands',
+      alt: 'Concrete pump truck',
+    },
+    ar: {
+      title: 'قطع لمحطات الخرسانة ومضخات الخرسانة',
+      text: 'كتالوج مهني لقطع الغيار التقنية. توفر وسرعة استجابة ومرافقة لعملياتكم في الورشات.',
+      catalogue: 'عرض الكتالوج',
+      quote: 'اطلب عرض سعر',
+      brands: 'العلامات المتوفرة',
+      alt: 'شاحنة مضخة خرسانة',
+    },
+  }[locale];
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -48,7 +77,7 @@ export function HeroShowcase() {
           <div className="absolute -right-2 bottom-0 top-0 w-[72%] opacity-85 md:w-[66%]">
             <Image
               src={backgrounds[activeIndex]}
-              alt="Camion pompe beton"
+              alt={copy.alt}
               width={1600}
               height={900}
               sizes="58vw"
@@ -72,7 +101,7 @@ export function HeroShowcase() {
             >
               <Image
                 src={backgrounds[activeIndex]}
-                alt="Camion pompe beton"
+                alt={copy.alt}
                 width={1600}
                 height={900}
                 sizes="(max-width: 768px) 100vw, 400px"
@@ -85,29 +114,28 @@ export function HeroShowcase() {
 
         <div className="rounded-2xl border border-white/15 bg-black/25 p-5 backdrop-blur-sm sm:p-6 md:p-8 lg:ml-[-3rem] lg:max-w-xl xl:ml-[-4.5rem]">
           <h1 className="max-w-3xl font-display text-[1.6rem] font-black uppercase leading-tight tracking-tight sm:text-[2.2rem] md:text-display-lg">
-            Pieces pour centrales et pompes a beton
+            {copy.title}
           </h1>
           <p className="mt-5 max-w-2xl text-sm leading-relaxed text-white/78 sm:text-base md:text-lg">
-            Catalogue professionnel de pieces techniques. Disponibilite, reactivite et accompagnement
-            pour vos operations chantier.
+            {copy.text}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <Link
               href="/catalogue"
               className="rounded bg-epct-lime px-6 py-3 text-sm font-semibold uppercase tracking-wider text-epct-ink transition hover:bg-lime-300"
             >
-              Voir le catalogue
+              {copy.catalogue}
             </Link>
             <Link
               href="/contact"
               className="rounded border border-white/30 px-6 py-3 text-sm font-semibold uppercase tracking-wider text-white transition hover:bg-white/10"
             >
-              Demander un devis
+              {copy.quote}
             </Link>
           </div>
 
           <div className="mt-8 border-t border-white/15 pt-5">
-            <p className="text-[11px] uppercase tracking-[0.3em] text-white/45">Marques disponibles</p>
+            <p className="text-[11px] uppercase tracking-[0.3em] text-white/45">{copy.brands}</p>
             <div className="mt-4 rounded-xl border border-white/20 bg-white p-4 shadow-[0_20px_40px_-30px_rgba(0,0,0,0.55)]">
               <div className="grid grid-cols-4 gap-x-3 sm:gap-x-5">
                 {brands.map((brand) => (

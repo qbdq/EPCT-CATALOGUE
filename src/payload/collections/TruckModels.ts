@@ -35,6 +35,7 @@ export const TruckModels: CollectionConfig = {
               name: 'name',
               type: 'text',
               required: true,
+              localized: true,
               label: 'Model name',
             },
             {
@@ -65,6 +66,7 @@ export const TruckModels: CollectionConfig = {
             {
               name: 'description',
               type: 'textarea',
+              localized: true,
               label: 'Short description',
             },
           ],

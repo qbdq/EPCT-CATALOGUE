@@ -3,51 +3,128 @@
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useSiteLocale } from '@/components/site/LocaleProvider';
 
 const LIME = '#A3E635';
-
-const categories = [
-  {
-    number: '01',
-    label: 'Toupies & Malaxeurs',
-    href: '/catalogue?category=toupie',
-    desc: 'Pieces de transmission, tambour, couronne dentee et reducteurs pour toutes marques de toupies beton.',
-    parts: ['Couronnes', 'Galets porteurs', 'Reducteurs', "Joints d'etancheite"],
-  },
-  {
-    number: '02',
-    label: 'Pompes a beton',
-    href: '/catalogue?category=pompe-beton',
-    desc: "Pistons, spheres de clapet, plaques d'usure, tubes en S et joints hydrauliques pour pompes sur camion.",
-    parts: ['Pistons hydrauliques', 'Spheres de clapet', 'Tubes en S', "Plaques d'usure"],
-  },
-  {
-    number: '03',
-    label: 'Centrales a beton',
-    href: '/catalogue?category=centrale-beton',
-    desc: 'Doseurs, tapis doseurs, vis sans fin, capteurs de pesage et actionneurs pour centrales a beton.',
-    parts: ['Vis sans fin', 'Tapis doseurs', 'Capteurs de pesage', 'Actionneurs'],
-  },
-];
 
 const rightPanels = [
   {
     image: '/img/segment_1.png',
-    stat: { value: '500+', label: 'References toupies' },
+    stat: { value: '500+' },
   },
   {
     image: '/img/segment_2.jpg',
-    stat: { value: '300+', label: 'References pompes' },
+    stat: { value: '300+' },
   },
   {
     image: '/img/segment_3.jpg',
-    stat: { value: '200+', label: 'References centrales' },
+    stat: { value: '200+' },
   },
 ];
 
 export function CategoriesReveal() {
   const [activeIndex, setActiveIndex] = useState(0);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const { locale } = useSiteLocale();
+
+  const copy = {
+    fr: {
+      eyebrow: 'Catalogue EPCT',
+      title: 'Nos segments',
+      categories: [
+        {
+          number: '01',
+          label: 'Toupies & Malaxeurs',
+          href: '/catalogue?category=toupie',
+          desc: 'Pieces de transmission, tambour, couronne dentee et reducteurs pour toutes marques de toupies beton.',
+          parts: ['Couronnes', 'Galets porteurs', 'Reducteurs', "Joints d'etancheite"],
+          statLabel: 'References toupies',
+        },
+        {
+          number: '02',
+          label: 'Pompes a beton',
+          href: '/catalogue?category=pompe-beton',
+          desc: "Pistons, spheres de clapet, plaques d'usure, tubes en S et joints hydrauliques pour pompes sur camion.",
+          parts: ['Pistons hydrauliques', 'Spheres de clapet', 'Tubes en S', "Plaques d'usure"],
+          statLabel: 'References pompes',
+        },
+        {
+          number: '03',
+          label: 'Centrales a beton',
+          href: '/catalogue?category=centrale-beton',
+          desc: 'Doseurs, tapis doseurs, vis sans fin, capteurs de pesage et actionneurs pour centrales a beton.',
+          parts: ['Vis sans fin', 'Tapis doseurs', 'Capteurs de pesage', 'Actionneurs'],
+          statLabel: 'References centrales',
+        },
+      ],
+      segment: 'Segment',
+      cta: 'Voir les pieces →',
+    },
+    en: {
+      eyebrow: 'EPCT catalogue',
+      title: 'Our segments',
+      categories: [
+        {
+          number: '01',
+          label: 'Mixers',
+          href: '/catalogue?category=toupie',
+          desc: 'Transmission parts, drums, ring gears and reducers for all concrete mixer brands.',
+          parts: ['Ring gears', 'Support rollers', 'Reducers', 'Sealing joints'],
+          statLabel: 'Mixer references',
+        },
+        {
+          number: '02',
+          label: 'Concrete pumps',
+          href: '/catalogue?category=pompe-beton',
+          desc: 'Pistons, valve balls, wear plates, S tubes and hydraulic seals for truck-mounted pumps.',
+          parts: ['Hydraulic pistons', 'Valve balls', 'S tubes', 'Wear plates'],
+          statLabel: 'Pump references',
+        },
+        {
+          number: '03',
+          label: 'Batching plants',
+          href: '/catalogue?category=centrale-beton',
+          desc: 'Feeders, weighing belts, screw conveyors, load cells and actuators for batching plants.',
+          parts: ['Screw conveyors', 'Weighing belts', 'Load cells', 'Actuators'],
+          statLabel: 'Plant references',
+        },
+      ],
+      segment: 'Segment',
+      cta: 'View parts →',
+    },
+    ar: {
+      eyebrow: 'كتالوج EPCT',
+      title: 'فئاتنا',
+      categories: [
+        {
+          number: '01',
+          label: 'الخلاطات',
+          href: '/catalogue?category=toupie',
+          desc: 'قطع نقل الحركة والاسطوانة والتاج المسنن والمخفضات لمختلف علامات خلاطات الخرسانة.',
+          parts: ['تيجان مسننة', 'بكرات حاملة', 'مخفضات', 'حشوات عزل'],
+          statLabel: 'مراجع الخلاطات',
+        },
+        {
+          number: '02',
+          label: 'مضخات الخرسانة',
+          href: '/catalogue?category=pompe-beton',
+          desc: 'مكابس وكرات صمامات وصفائح تآكل وانابيب S وحشوات هيدروليكية لمضخات الشاحنات.',
+          parts: ['مكابس هيدروليكية', 'كرات صمامات', 'انابيب S', 'صفائح تآكل'],
+          statLabel: 'مراجع المضخات',
+        },
+        {
+          number: '03',
+          label: 'محطات الخرسانة',
+          href: '/catalogue?category=centrale-beton',
+          desc: 'مغذيات وسيور وزن ولولب نقل وخلايا وزن ومشغلات لمحطات الخرسانة.',
+          parts: ['لولب نقل', 'سيور وزن', 'خلايا وزن', 'مشغلات'],
+          statLabel: 'مراجع المحطات',
+        },
+      ],
+      segment: 'الفئة',
+      cta: 'عرض القطع ←',
+    },
+  }[locale];
 
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
@@ -68,16 +145,16 @@ export function CategoriesReveal() {
     <section className="w-full bg-epct-dark py-0">
       <div className="px-4 pt-12 text-center sm:px-6 md:px-14 md:pt-16">
         <p className="font-display text-xs uppercase tracking-[0.45em] sm:text-sm" style={{ color: LIME }}>
-          Catalogue EPCT
+          {copy.eyebrow}
         </p>
         <h2 className="mt-2 font-display text-3xl font-black uppercase text-white sm:mt-3 sm:text-5xl md:text-6xl">
-          Nos segments
+          {copy.title}
         </h2>
       </div>
 
       <div className="mx-auto max-w-[1500px] px-5 md:px-8">
         <div className="min-w-0">
-          {categories.map((cat, i) => (
+          {copy.categories.map((cat, i) => (
             <div
               key={cat.number}
               ref={(el) => {
@@ -88,7 +165,7 @@ export function CategoriesReveal() {
               <div className="relative h-[65vh] min-h-[480px] w-full overflow-hidden rounded-2xl border border-white/20 shadow-[0_30px_70px_-30px_rgba(0,0,0,0.65)] sm:h-[80vh] sm:min-h-[620px] sm:rounded-[2.2rem]">
                 <Image
                   src={rightPanels[i].image}
-                  alt={`Segment ${cat.number}`}
+                  alt={`${copy.segment} ${cat.number}`}
                   width={1600}
                   height={1200}
                   sizes="(max-width: 1024px) 100vw, 92vw"
@@ -111,7 +188,7 @@ export function CategoriesReveal() {
                     </p>
 
                     <span className="mt-2 inline-block rounded-full border border-white/35 bg-white/10 px-4 py-1.5 text-sm uppercase tracking-[0.24em] text-white/90">
-                      Segment {cat.number}
+                      {copy.segment} {cat.number}
                     </span>
 
                     <h3 className="mt-3 font-display text-2xl font-black uppercase leading-tight text-white sm:mt-4 sm:text-4xl md:text-5xl">
@@ -138,7 +215,7 @@ export function CategoriesReveal() {
                         {rightPanels[i].stat.value}
                       </p>
                       <p className="text-[10px] uppercase tracking-[0.23em] text-white/85 sm:text-xs md:text-sm">
-                        {rightPanels[i].stat.label}
+                        {cat.statLabel}
                       </p>
                     </div>
 
@@ -146,7 +223,7 @@ export function CategoriesReveal() {
                       href={cat.href}
                       className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#d6fb7f] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-epct-ink sm:mt-6 sm:px-6 sm:py-3 sm:text-sm"
                     >
-                      Voir les pieces →
+                      {copy.cta}
                     </Link>
                   </div>
                 </div>

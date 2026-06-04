@@ -8,6 +8,10 @@ import UploadThumbnailCell from '../components/UploadThumbnailCell.tsx';
 
 export const Brands: CollectionConfig = {
   slug: 'brands',
+  labels: {
+    singular: 'Brand',
+    plural: 'Brands',
+  },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'updatedAt', 'featuredImage'],
@@ -35,12 +39,23 @@ export const Brands: CollectionConfig = {
               name: 'name',
               type: 'text',
               required: true,
+              localized: true,
               label: 'Brand name',
             },
             {
               name: 'description',
               type: 'textarea',
+              localized: true,
               label: 'Short description',
+            },
+            {
+              name: 'badgeColor',
+              type: 'text',
+              label: 'Badge color',
+              admin: {
+                description: 'Use a HEX color like #15803d for catalogue badges.',
+                placeholder: '#15803d',
+              },
             },
           ],
         },

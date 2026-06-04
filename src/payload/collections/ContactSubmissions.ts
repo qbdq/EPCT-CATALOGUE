@@ -4,6 +4,10 @@ import { contactReasons } from '@/lib/contact-reasons';
 
 export const ContactSubmissions: CollectionConfig = {
   slug: 'contact-submissions',
+  labels: {
+    singular: 'Contact submission',
+    plural: 'Contact submissions',
+  },
   admin: {
     useAsTitle: 'email',
     defaultColumns: ['name', 'reason', 'email', 'phone', 'address', 'attachment', 'submittedAt', 'read'],

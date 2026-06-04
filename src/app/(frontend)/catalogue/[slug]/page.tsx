@@ -1,31 +1,52 @@
 import { notFound } from 'next/navigation';
+import { ProductDetailBody } from '@/components/catalogue/ProductDetailBody';
 import { SiteShell } from '@/components/site/SiteShell';
-import { getPublicProductBySlug } from '@/lib/public-api';
+import { getPublicGlobalSettings, getPublicProductBySlug, getPublicProducts } from '@/lib/public-api';
+
+function getRelationIds(
+  relation?:
+    | { id?: string; slug?: string }
+    | string
+    | Array<{ id?: string; slug?: string } | string>
+    | null,
+) {
+  if (!relation) return [];
+  const values = Array.isArray(relation) ? relation : [relation];
+
+  return values
+    .map((value) => (typeof value === 'string' ? value : value.id || value.slug))
+    .filter(Boolean) as string[];
+}
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const product = await getPublicProductBySlug(slug);
+
+  const [product, allProducts, settings] = await Promise.all([
+    getPublicProductBySlug(slug),
+    getPublicProducts(),
+    getPublicGlobalSettings(),
+  ]);
 
   if (!product) notFound();
 
+  const productBrandIds = new Set(getRelationIds(product.brand));
+  const productCategoryIds = new Set(getRelationIds(product.category));
+
+  const similarProducts = allProducts
+    .filter((item) => item.id !== product.id)
+    .filter((item) => {
+      const sameCategory = getRelationIds(item.category).some((id) => productCategoryIds.has(id));
+      const sharedBrand = getRelationIds(item.brand).some((id) => productBrandIds.has(id));
+      return sameCategory && sharedBrand;
+    })
+    .slice(0, 3);
+
   return (
     <SiteShell>
-      <main className="container py-12">
-        <p className="font-display text-sm uppercase tracking-[0.2em] text-epct-green">Produit</p>
-        <h1 className="mt-2 font-display text-4xl uppercase text-epct-dark">{product.name}</h1>
-        <p className="mt-2 text-sm uppercase tracking-wider text-epct-ink/60">Ref. {product.reference}</p>
-        <div className="mt-4 flex flex-wrap gap-2 text-xs font-semibold uppercase tracking-[0.15em]">
-          {typeof product.brand !== 'string' && product.brand ? (
-            <span className="rounded-sm bg-epct-green/10 px-3 py-2 text-epct-green">{product.brand.name}</span>
-          ) : null}
-          {typeof product.truckCategory !== 'string' && product.truckCategory ? (
-            <span className="rounded-sm bg-neutral-100 px-3 py-2 text-epct-ink/70">{product.truckCategory.name}</span>
-          ) : null}
-          {typeof product.truckModel !== 'string' && product.truckModel ? (
-            <span className="rounded-sm bg-neutral-100 px-3 py-2 text-epct-ink/70">{product.truckModel.name}</span>
-          ) : null}
+      <main className="px-0 pb-14 pt-0 md:pb-16">
+        <div className="mx-auto max-w-7xl">
+          <ProductDetailBody product={product} settings={settings} similarProducts={similarProducts} />
         </div>
-        <p className="mt-6 max-w-3xl text-epct-ink/80">{product.shortDescription}</p>
       </main>
     </SiteShell>
   );

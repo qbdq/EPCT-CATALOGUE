@@ -8,6 +8,10 @@ import UploadThumbnailCell from '../components/UploadThumbnailCell.tsx';
 
 export const TruckCategories: CollectionConfig = {
   slug: 'truck-categories',
+  labels: {
+    singular: 'Categorie camion',
+    plural: 'Categories camion',
+  },
   admin: {
     useAsTitle: 'name',
     defaultColumns: ['name', 'updatedAt', 'image'],
@@ -35,11 +39,13 @@ export const TruckCategories: CollectionConfig = {
               name: 'name',
               type: 'text',
               required: true,
+              localized: true,
               label: 'Truck category name',
             },
             {
               name: 'description',
               type: 'textarea',
+              localized: true,
               label: 'Short description',
             },
           ],

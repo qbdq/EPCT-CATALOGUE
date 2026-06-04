@@ -7,10 +7,13 @@ import { onDocChange, onDocDelete } from '../hooks/revalidate.ts';
 
 export const Blogs: CollectionConfig = {
   slug: 'blogs',
+  labels: {
+    singular: 'Blog',
+    plural: 'Blogs',
+  },
   admin: {
     useAsTitle: 'title',
     defaultColumns: ['title', 'author', 'publishedAt', 'featured', 'active'],
-    group: 'Catalogue',
     description: 'Articles, conseils et actualites EPCT pour le secteur beton.',
   },
   access: {
@@ -30,19 +33,21 @@ export const Blogs: CollectionConfig = {
         {
           label: 'Contenu',
           fields: [
-            { name: 'title', type: 'text', required: true, label: "Titre de l'article" },
+            { name: 'title', type: 'text', required: true, localized: true, label: "Titre de l'article" },
             slugField(),
-            { name: 'author', type: 'text', required: true, label: 'Auteur' },
+            { name: 'author', type: 'text', required: true, localized: true, label: 'Auteur' },
             {
               name: 'excerpt',
               type: 'textarea',
               required: true,
+              localized: true,
               label: 'Courte description',
             },
             {
               name: 'content',
               type: 'richText',
               required: true,
+              localized: true,
               label: 'Texte de l article',
             },
           ],
@@ -59,6 +64,7 @@ export const Blogs: CollectionConfig = {
             {
               name: 'coverImageTitle',
               type: 'text',
+              localized: true,
               label: "Titre de l'image principale",
             },
             {
@@ -80,6 +86,7 @@ export const Blogs: CollectionConfig = {
                 {
                   name: 'title',
                   type: 'text',
+                  localized: true,
                   label: "Titre de l'image",
                 },
               ],
@@ -102,6 +109,7 @@ export const Blogs: CollectionConfig = {
                   name: 'label',
                   type: 'text',
                   required: true,
+                  localized: true,
                   label: 'Tag',
                 },
               ],

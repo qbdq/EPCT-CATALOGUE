@@ -4,37 +4,26 @@ import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useSiteLocale } from '@/components/site/LocaleProvider';
 
 const brands = [
   {
     name: 'Putzmeister',
-    origin: 'Allemagne',
-    specialty:
-      "Pompes a beton & malaxeurs haute pression. Pieces d'usure, pistons et joints disponibles pour toutes generations de pompes.",
     href: '/catalogue?brand=putzmeister',
     image: '/img/putz-pump-truck.png',
   },
   {
     name: 'Schwing',
-    origin: 'Allemagne',
-    specialty:
-      'Fleches de pompage & systemes de distribution beton. Stock de pieces hydrauliques et mecaniques pour Schwing S- et KVM-series.',
     href: '/catalogue?brand=schwing',
     image: '/img/schwing-pump-truck.png',
   },
   {
     name: 'CIFA',
-    origin: 'Italie',
-    specialty:
-      "Centrales a beton & pompes compactes sur camion. Pieces d'origine et compatibles pour gammes K et PC.",
     href: '/catalogue?brand=cifa',
     image: '/img/cifa-pump-truck.png',
   },
   {
     name: 'Zoomlion',
-    origin: 'Chine',
-    specialty:
-      'Equipements de levage, pompage et melange beton. Pieces pour pompes sur camion et centrales a beton Zoomlion.',
     href: '/catalogue?brand=zoomlion',
     image: '/img/zoomlion-pump-truck.png',
   },
@@ -43,6 +32,46 @@ const brands = [
 export function BrandsReveal() {
   const [activeIndex, setActiveIndex] = useState(0);
   const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const { locale } = useSiteLocale();
+
+  const copy = {
+    fr: {
+      eyebrow: 'Marques partenaires',
+      title: 'Nos marques',
+      origin: ['Allemagne', 'Allemagne', 'Italie', 'Chine'],
+      specialty: [
+        "Pompes a beton & malaxeurs haute pression. Pieces d'usure, pistons et joints disponibles pour toutes generations de pompes.",
+        'Fleches de pompage & systemes de distribution beton. Stock de pieces hydrauliques et mecaniques pour Schwing S- et KVM-series.',
+        "Centrales a beton & pompes compactes sur camion. Pieces d'origine et compatibles pour gammes K et PC.",
+        'Equipements de levage, pompage et melange beton. Pieces pour pompes sur camion et centrales a beton Zoomlion.',
+      ],
+      cta: 'Voir les pieces →',
+    },
+    en: {
+      eyebrow: 'Partner brands',
+      title: 'Our brands',
+      origin: ['Germany', 'Germany', 'Italy', 'China'],
+      specialty: [
+        'Concrete pumps and high-pressure mixers. Wear parts, pistons and seals available for all pump generations.',
+        'Pumping booms and concrete distribution systems. Hydraulic and mechanical spare parts for Schwing S and KVM series.',
+        'Batching plants and compact truck pumps. Genuine and compatible parts for K and PC ranges.',
+        'Lifting, pumping and concrete mixing equipment. Parts for Zoomlion truck pumps and batching plants.',
+      ],
+      cta: 'View parts →',
+    },
+    ar: {
+      eyebrow: 'العلامات الشريكة',
+      title: 'علاماتنا',
+      origin: ['المانيا', 'المانيا', 'ايطاليا', 'الصين'],
+      specialty: [
+        'مضخات خرسانة وخلاطات عالية الضغط. قطع تآكل ومكابس وحشوات متوفرة لمختلف اجيال المضخات.',
+        'اذرع ضخ وانظمة توزيع الخرسانة. مخزون من القطع الهيدروليكية والميكانيكية لسلاسل Schwing.',
+        'محطات خرسانة ومضخات مدمجة على الشاحنات. قطع اصلية ومتوافقة لسلاسل K و PC.',
+        'معدات رفع وضخ وخلط الخرسانة. قطع لمضخات الشاحنات ومحطات الخرسانة من Zoomlion.',
+      ],
+      cta: 'عرض القطع ←',
+    },
+  }[locale];
 
   useEffect(() => {
     const observers: IntersectionObserver[] = [];
@@ -64,10 +93,10 @@ export function BrandsReveal() {
     <section className="w-full bg-white py-0">
       <div className="px-6 pt-20 text-center md:px-14">
         <p className="font-display text-sm uppercase tracking-[0.45em]" style={{ color: '#1F7A4D' }}>
-          Marques partenaires
+          {copy.eyebrow}
         </p>
         <h2 className="mt-3 font-display text-5xl font-black uppercase tracking-tight text-epct-dark md:text-6xl">
-          Nos marques
+          {copy.title}
         </h2>
       </div>
 
@@ -110,7 +139,7 @@ export function BrandsReveal() {
                     color: i === activeIndex ? '#1F7A4D' : 'rgba(0,0,0,0.3)',
                   }}
                 >
-                  {brand.origin}
+                  {copy.origin[i]}
                 </span>
 
                 <h3
@@ -124,7 +153,7 @@ export function BrandsReveal() {
                   className="mt-5 text-base leading-relaxed transition-colors duration-300 sm:text-lg md:text-xl"
                   style={{ color: i === activeIndex ? 'rgba(0,0,0,0.65)' : 'rgba(0,0,0,0.2)' }}
                 >
-                  {brand.specialty}
+                  {copy.specialty[i]}
                 </p>
 
                 <Link
@@ -136,7 +165,7 @@ export function BrandsReveal() {
                     pointerEvents: i === activeIndex ? 'auto' : 'none',
                   }}
                 >
-                  Voir les pieces →
+                  {copy.cta}
                 </Link>
               </div>
             </div>

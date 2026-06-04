@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { contactReasons } from '@/lib/contact-reasons';
+import { useSiteLocale } from '@/components/site/LocaleProvider';
 
 type FormState = {
   name: string;
@@ -23,7 +24,78 @@ const initialState: FormState = {
   consent: false,
 };
 
+const textByLocale = {
+  fr: {
+    sending: 'Envoi en cours',
+    sendingText: "Votre demande est en train d'etre transmise.",
+    sent: 'Demande envoyee',
+    redirecting: 'Redirection en cours...',
+    fullName: 'Nom complet',
+    yourName: 'Votre nom',
+    phone: 'Telephone',
+    address: 'Adresse',
+    addressPlaceholder: 'Ville, zone ou adresse',
+    reason: 'Motif de contact',
+    attachment: 'Piece jointe',
+    attachmentHelp: 'Piece jointe optionnelle, formats acceptes: JPEG, PNG ou PDF. Taille maximale 2 MB.',
+    message: 'Votre message',
+    messagePlaceholder: 'Precisez la machine, la piece recherchee, la reference ou le contexte de votre demande.',
+    consentTitle: "J'ai compris et j'accepte",
+    consentText:
+      "En communiquant mes informations, je consens a etre recontacte par voie electronique ou telephonique et j'accepte que ces informations soient exploitees dans le cadre de ma demande et de la relation commerciale qui peut en decouler. Je pourrai faire modifier ou supprimer mes informations sur simple demande.",
+    reset: 'Reinitialiser',
+    submit: 'Envoyer la demande',
+    submitting: 'Envoi en cours...',
+  },
+  en: {
+    sending: 'Sending',
+    sendingText: 'Your request is being transmitted.',
+    sent: 'Request sent',
+    redirecting: 'Redirecting...',
+    fullName: 'Full name',
+    yourName: 'Your name',
+    phone: 'Phone',
+    address: 'Address',
+    addressPlaceholder: 'City, area or address',
+    reason: 'Reason for contact',
+    attachment: 'Attachment',
+    attachmentHelp: 'Optional attachment, accepted formats: JPEG, PNG or PDF. Maximum size 2 MB.',
+    message: 'Your message',
+    messagePlaceholder: 'Specify the machine, requested part, reference or the context of your request.',
+    consentTitle: 'I understand and agree',
+    consentText:
+      'By sharing my information, I agree to be contacted by email or phone and accept that this information may be used in connection with my request and any commercial relationship that may result from it. I may request correction or deletion of my information at any time.',
+    reset: 'Reset',
+    submit: 'Send request',
+    submitting: 'Sending...',
+  },
+  ar: {
+    sending: 'جار الارسال',
+    sendingText: 'يتم الان ارسال طلبك.',
+    sent: 'تم ارسال الطلب',
+    redirecting: 'جار اعادة التوجيه...',
+    fullName: 'الاسم الكامل',
+    yourName: 'اسمك',
+    phone: 'الهاتف',
+    address: 'العنوان',
+    addressPlaceholder: 'المدينة او المنطقة او العنوان',
+    reason: 'سبب التواصل',
+    attachment: 'مرفق',
+    attachmentHelp: 'مرفق اختياري، الصيغ المقبولة: JPEG و PNG و PDF. الحجم الاقصى 2 MB.',
+    message: 'رسالتك',
+    messagePlaceholder: 'حدد الالة او القطعة المطلوبة او المرجع او سياق طلبك.',
+    consentTitle: 'لقد فهمت ووافقت',
+    consentText:
+      'من خلال ارسال معلوماتي، اوافق على اعادة التواصل معي عبر البريد الالكتروني او الهاتف، كما اوافق على استخدام هذه المعلومات في اطار طلبي والعلاقة التجارية التي قد تنتج عنه. يمكنني طلب تعديل او حذف معلوماتي في اي وقت.',
+    reset: 'اعادة التعيين',
+    submit: 'ارسال الطلب',
+    submitting: 'جار الارسال...',
+  },
+} as const;
+
 export function ContactForm() {
+  const { locale } = useSiteLocale();
+  const text = textByLocale[locale];
   const [form, setForm] = useState<FormState>(initialState);
   const [attachment, setAttachment] = useState<File | null>(null);
   const [status, setStatus] = useState<'idle' | 'submitting' | 'success' | 'error'>('idle');
@@ -53,9 +125,7 @@ export function ContactForm() {
       formData.set('reason', form.reason ?? '');
       formData.set('message', form.message ?? '');
       formData.set('consent', String(!!form.consent));
-      if (attachment) {
-        formData.set('attachment', attachment);
-      }
+      if (attachment) formData.set('attachment', attachment);
 
       const response = await fetch('/api/contact', {
         method: 'POST',
@@ -103,10 +173,8 @@ export function ContactForm() {
           <div className="flex flex-col items-center gap-4 text-center">
             <div className="h-12 w-12 animate-spin rounded-full border-4 border-epct-green/20 border-t-epct-green" />
             <div>
-              <p className="font-display text-xl uppercase text-epct-dark">Envoi en cours</p>
-              <p className="mt-1 text-sm text-epct-ink/70">
-                Votre demande est en train d&apos;etre transmise.
-              </p>
+              <p className="font-display text-xl uppercase text-epct-dark">{text.sending}</p>
+              <p className="mt-1 text-sm text-epct-ink/70">{text.sendingText}</p>
             </div>
           </div>
         </div>
@@ -119,10 +187,8 @@ export function ContactForm() {
               ✓
             </div>
             <div>
-              <p className="font-display text-2xl uppercase text-epct-dark">Demande envoyee</p>
-              <p className="mt-1 text-sm text-epct-ink/70">
-                Redirection en cours...
-              </p>
+              <p className="font-display text-2xl uppercase text-epct-dark">{text.sent}</p>
+              <p className="mt-1 text-sm text-epct-ink/70">{text.redirecting}</p>
             </div>
           </div>
         </div>
@@ -131,14 +197,14 @@ export function ContactForm() {
       <div className="grid gap-5 md:grid-cols-2">
         <label className="grid gap-2 self-start">
           <span className="text-sm font-medium text-epct-dark">
-            <span className="text-orange-500">*</span> Nom complet
+            <span className="text-orange-500">*</span> {text.fullName}
           </span>
           <input
             required
             value={form.name ?? ''}
             onChange={(event) => setForm((current) => ({ ...current, name: event.target.value }))}
             className="min-h-12 border border-epct-ink/15 bg-white px-4 text-epct-dark outline-none transition focus:border-epct-green"
-            placeholder="Votre nom"
+            placeholder={text.yourName}
           />
         </label>
 
@@ -160,7 +226,7 @@ export function ContactForm() {
       <div className="grid gap-5 md:grid-cols-2">
         <label className="grid gap-2 self-start">
           <span className="text-sm font-medium text-epct-dark">
-            <span className="text-orange-500">*</span> Téléphone
+            <span className="text-orange-500">*</span> {text.phone}
           </span>
           <input
             required
@@ -172,21 +238,21 @@ export function ContactForm() {
         </label>
 
         <label className="grid gap-2 self-start">
-          <span className="text-sm font-medium text-epct-dark">Adresse</span>
+          <span className="text-sm font-medium text-epct-dark">{text.address}</span>
           <input
             value={form.address ?? ''}
             onChange={(event) =>
               setForm((current) => ({ ...current, address: event.target.value }))
             }
             className="min-h-12 border border-epct-ink/15 bg-white px-4 text-epct-dark outline-none transition focus:border-epct-green"
-            placeholder="Ville, zone ou adresse"
+            placeholder={text.addressPlaceholder}
           />
         </label>
       </div>
 
       <div className="grid gap-5 md:grid-cols-1">
         <label className="grid gap-2 self-start">
-          <span className="text-sm font-medium text-epct-dark">Motif de contact</span>
+          <span className="text-sm font-medium text-epct-dark">{text.reason}</span>
           <select
             required
             value={form.reason ?? ''}
@@ -203,7 +269,7 @@ export function ContactForm() {
       </div>
 
       <label className="grid gap-2 self-start">
-        <span className="text-sm font-medium text-epct-dark">Pièce jointe</span>
+        <span className="text-sm font-medium text-epct-dark">{text.attachment}</span>
         <input
           type="file"
           onChange={(event) => {
@@ -213,21 +279,19 @@ export function ContactForm() {
           className="min-h-12 border border-epct-ink/15 bg-white px-4 py-3 text-sm text-epct-dark outline-none transition file:mr-4 file:border-0 file:bg-epct-green/10 file:px-3 file:py-2 file:font-semibold file:text-epct-green focus:border-epct-green"
           accept=".pdf,.png,.jpg,.jpeg"
         />
-        <p className="text-xs leading-relaxed text-epct-ink/60">
-          Pièce jointe optionnelle, formats acceptés: JPEG, PNG ou PDF. Taille maximale 2 MB.
-        </p>
+        <p className="text-xs leading-relaxed text-epct-ink/60">{text.attachmentHelp}</p>
       </label>
 
       <label className="grid gap-2 self-start">
         <span className="text-sm font-medium text-epct-dark">
-          <span className="text-orange-500">*</span> Votre message
+          <span className="text-orange-500">*</span> {text.message}
         </span>
         <textarea
           required
           value={form.message ?? ''}
           onChange={(event) => setForm((current) => ({ ...current, message: event.target.value }))}
           className="min-h-40 border border-epct-ink/15 bg-white px-4 py-3 text-epct-dark outline-none transition focus:border-epct-green"
-          placeholder="Precisez la machine, la piece recherchee, la reference ou le contexte de votre demande."
+          placeholder={text.messagePlaceholder}
         />
       </label>
 
@@ -243,13 +307,8 @@ export function ContactForm() {
             className="mt-1 h-4 w-4 border border-epct-ink/20 accent-epct-green"
           />
           <div>
-            <p className="font-medium text-epct-dark">J&apos;ai compris et j&apos;accepte</p>
-            <p className="mt-2 text-sm leading-relaxed text-epct-ink/68">
-              En communiquant mes informations, je consens a etre recontacte par voie
-              electronique ou telephonique et j&apos;accepte que ces informations soient exploitees
-              dans le cadre de ma demande et de la relation commerciale qui peut en decouler. Je
-              pourrai faire modifier ou supprimer mes informations sur simple demande.
-            </p>
+            <p className="font-medium text-epct-dark">{text.consentTitle}</p>
+            <p className="mt-2 text-sm leading-relaxed text-epct-ink/68">{text.consentText}</p>
           </div>
         </div>
       </label>
@@ -265,14 +324,14 @@ export function ContactForm() {
           }}
           className="inline-flex min-h-14 items-center justify-center border border-epct-ink/15 bg-white px-6 text-sm font-semibold uppercase tracking-[0.08em] text-epct-dark transition hover:border-epct-red hover:text-epct-red"
         >
-          Reinitialiser
+          {text.reset}
         </button>
         <button
           type="submit"
           disabled={status === 'submitting' || !form.consent}
           className="inline-flex min-h-14 items-center justify-center bg-epct-green px-8 text-base font-semibold uppercase tracking-[0.08em] text-white transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          {status === 'submitting' ? 'Envoi en cours...' : 'Envoyer la demande'}
+          {status === 'submitting' ? text.submitting : text.submit}
         </button>
       </div>
 
