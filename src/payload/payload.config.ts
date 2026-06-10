@@ -20,11 +20,15 @@ import AboutPage from './globals/AboutPage.ts';
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 
+const devDbUrl = 'postgresql://epct_user:epct_dev_pw@127.0.0.1:55432/epct_db';
 const dbUrl =
-  process.env.NODE_ENV === 'development'
-    ? 'postgresql://epct_user:epct_dev_pw@127.0.0.1:55432/epct_db'
-    : process.env.DATABASE_URI;
+  process.env.DATABASE_URI ||
+  (process.env.NODE_ENV === 'development' ? devDbUrl : undefined);
 const payloadSecret = process.env.PAYLOAD_SECRET;
+const s3Endpoint = process.env.S3_ENDPOINT;
+const s3AccessKey = process.env.S3_ACCESS_KEY;
+const s3SecretKey = process.env.S3_SECRET_KEY;
+const hasS3StorageConfig = Boolean(s3Endpoint && s3AccessKey && s3SecretKey);
 
 if (!dbUrl) throw new Error('DATABASE_URI is required');
 if (!payloadSecret) throw new Error('PAYLOAD_SECRET is required');
@@ -72,23 +76,25 @@ export default buildConfig({
     ContactSubmissions,
   ],
   globals: [GlobalSettings, AboutPage],
-  plugins: [
-    s3Storage({
-      collections: {
-        media: true,
-      },
-      bucket: process.env.S3_BUCKET || 'epct-media',
-      config: {
-        endpoint: process.env.S3_ENDPOINT,
-        region: process.env.S3_REGION || 'us-east-1',
-        forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
-        credentials: {
-          accessKeyId: process.env.S3_ACCESS_KEY || '',
-          secretAccessKey: process.env.S3_SECRET_KEY || '',
-        },
-      },
-    }),
-  ],
+  plugins: hasS3StorageConfig
+    ? [
+        s3Storage({
+          collections: {
+            media: true,
+          },
+          bucket: process.env.S3_BUCKET || 'epct-media',
+          config: {
+            endpoint: s3Endpoint!,
+            region: process.env.S3_REGION || 'us-east-1',
+            forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
+            credentials: {
+              accessKeyId: s3AccessKey!,
+              secretAccessKey: s3SecretKey!,
+            },
+          },
+        }),
+      ]
+    : [],
   typescript: {
     outputFile: path.resolve(dirname, '../types/payload-types.ts'),
   },

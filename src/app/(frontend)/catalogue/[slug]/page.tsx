@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { notFound } from 'next/navigation';
 import { ProductDetailBody } from '@/components/catalogue/ProductDetailBody';
 import { SiteShell } from '@/components/site/SiteShell';
@@ -18,13 +19,20 @@ function getRelationIds(
     .filter(Boolean) as string[];
 }
 
+function resolveLocale(value: string | undefined): 'fr' | 'en' | 'ar' {
+  if (value === 'en' || value === 'ar') return value;
+  return 'fr';
+}
+
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get('site-locale')?.value);
   const { slug } = await params;
 
   const [product, allProducts, settings] = await Promise.all([
-    getPublicProductBySlug(slug),
-    getPublicProducts(),
-    getPublicGlobalSettings(),
+    getPublicProductBySlug(slug, locale),
+    getPublicProducts({}, locale),
+    getPublicGlobalSettings(locale),
   ]);
 
   if (!product) notFound();

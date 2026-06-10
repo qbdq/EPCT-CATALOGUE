@@ -145,6 +145,7 @@ export type ProductFilters = {
 };
 
 export type PublicLocale = 'fr' | 'en' | 'ar';
+const PUBLIC_LOCALES: PublicLocale[] = ['fr', 'en', 'ar'];
 
 function getSiteURL() {
   return process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
@@ -279,11 +280,28 @@ export async function getPublicProducts(
 }
 
 export async function getPublicProductBySlug(slug: string, locale?: PublicLocale): Promise<PublicProduct | null> {
-  const products = await fetchPayloadList<PublicProduct>(
-    withLocale(`/api/products?where[slug][equals]=${encodeURIComponent(slug)}&limit=1&depth=1`, locale),
-  );
+  const localesToTry = locale
+    ? [locale, ...PUBLIC_LOCALES.filter((value) => value !== locale)]
+    : PUBLIC_LOCALES;
 
-  return products[0] ?? null;
+  for (const localeToTry of localesToTry) {
+    const products = await fetchPayloadList<PublicProduct>(
+      withLocale(
+        `/api/products?where[slug][equals]=${encodeURIComponent(slug)}&limit=1&depth=1`,
+        localeToTry,
+      ),
+    );
+
+    if (products[0]) {
+      const localizedProduct = await fetchPayloadGlobal<PublicProduct>(
+        withLocale(`/api/products/${products[0].id}?depth=1`, locale ?? localeToTry),
+      );
+
+      return localizedProduct ?? products[0];
+    }
+  }
+
+  return null;
 }
 
 export async function getPublicBlogs(locale?: PublicLocale): Promise<PublicBlog[]> {

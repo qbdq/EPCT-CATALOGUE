@@ -89,27 +89,42 @@ export function HeroShowcase() {
       </AnimatePresence>
 
       <div className="relative mx-auto flex w-full max-w-[1500px] flex-col gap-6 lg:grid lg:grid-cols-[1fr_1fr] lg:items-end lg:gap-10">
-        <div className="relative mx-auto aspect-[16/10] w-full max-w-md lg:hidden">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={backgrounds[activeIndex]}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.5 }}
-              className="absolute inset-0"
-            >
-              <Image
-                src={backgrounds[activeIndex]}
-                alt={copy.alt}
-                width={1600}
-                height={900}
-                sizes="(max-width: 768px) 100vw, 400px"
-                className="h-full w-full object-contain"
-                priority
+        <div className="mx-auto w-full max-w-md lg:hidden">
+          <div className="relative aspect-[16/10]">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={backgrounds[activeIndex]}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.5 }}
+                className="absolute inset-0"
+              >
+                <Image
+                  src={backgrounds[activeIndex]}
+                  alt={copy.alt}
+                  width={1600}
+                  height={900}
+                  sizes="(max-width: 768px) 100vw, 400px"
+                  className="h-full w-full object-contain"
+                  priority
+                />
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          <div className="mt-3 flex items-center justify-center gap-2">
+            {backgrounds.map((bg, idx) => (
+              <button
+                key={bg}
+                onClick={() => setActiveIndex(idx)}
+                aria-label={`Slide ${idx + 1}`}
+                className={`h-1.5 rounded-full transition-all duration-300 ${
+                  idx === activeIndex ? 'w-6 bg-epct-lime' : 'w-2 bg-white/35'
+                }`}
               />
-            </motion.div>
-          </AnimatePresence>
+            ))}
+          </div>
         </div>
 
         <div className="rounded-2xl border border-white/15 bg-black/25 p-5 backdrop-blur-sm sm:p-6 md:p-8 lg:ml-[-3rem] lg:max-w-xl xl:ml-[-4.5rem]">
@@ -153,19 +168,6 @@ export function HeroShowcase() {
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="flex items-center justify-center gap-2 lg:hidden">
-          {backgrounds.map((bg, idx) => (
-            <button
-              key={bg}
-              onClick={() => setActiveIndex(idx)}
-              aria-label={`Slide ${idx + 1}`}
-              className={`h-1.5 rounded-full transition-all duration-300 ${
-                idx === activeIndex ? 'w-6 bg-epct-lime' : 'w-2 bg-white/35'
-              }`}
-            />
-          ))}
         </div>
 
         <div className="hidden items-end justify-end lg:flex">

@@ -7,6 +7,7 @@ import {
   ChevronRight,
   LayoutGrid,
   List,
+  RotateCcw,
   Search,
   SlidersHorizontal,
   X,
@@ -240,7 +241,33 @@ export function CatalogueExplorer({
   const [modelQuery, setModelQuery] = useState('');
   const [openFilterPicker, setOpenFilterPicker] = useState<string | null>(null);
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'kanban' | 'list'>('kanban');
+
+  useEffect(() => {
+    function syncMobileView() {
+      if (window.innerWidth < 1024) {
+        setViewMode('kanban');
+      }
+    }
+
+    syncMobileView();
+    window.addEventListener('resize', syncMobileView);
+    return () => window.removeEventListener('resize', syncMobileView);
+  }, []);
+
+  useEffect(() => {
+    function closeFiltersOnScroll() {
+      setOpenFilterPicker(null);
+      setMobileFiltersOpen(false);
+      setFiltersExpanded(false);
+    }
+
+    if (!mobileFiltersOpen && !filtersExpanded && !openFilterPicker) return;
+
+    window.addEventListener('scroll', closeFiltersOnScroll, { passive: true });
+    return () => window.removeEventListener('scroll', closeFiltersOnScroll);
+  }, [filtersExpanded, mobileFiltersOpen, openFilterPicker]);
 
   function toggleValue(value: string, values: string[], setValues: (values: string[]) => void) {
     setValues(values.includes(value) ? values.filter((item) => item !== value) : [...values, value]);
@@ -430,6 +457,16 @@ export function CatalogueExplorer({
     setFiltersExpanded((current) => !current);
   }
 
+  function openMobileFilters() {
+    setOpenFilterPicker(null);
+    setMobileFiltersOpen(true);
+  }
+
+  function closeMobileFilters() {
+    setOpenFilterPicker(null);
+    setMobileFiltersOpen(false);
+  }
+
   const hasActiveFilters =
     query.trim().length > 0 ||
     selectedBrands.length > 0 ||
@@ -523,6 +560,83 @@ export function CatalogueExplorer({
     currentPage * PRODUCTS_PER_PAGE,
   );
 
+  const filtersContent = (
+    <div className="grid gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))_1.15fr] lg:items-start">
+      <FilterPicker
+        pickerKey="brands"
+        openPicker={openFilterPicker}
+        setOpenPicker={setOpenFilterPicker}
+        title="Marques"
+        placeholder="Selectionner"
+        options={filterableBrands}
+        selectedValues={selectedBrands}
+        searchValue={brandQuery}
+        onSearchChange={setBrandQuery}
+        onToggleValue={(value) => toggleValue(value, selectedBrands, setSelectedBrands)}
+      />
+
+      <FilterPicker
+        pickerKey="truck-categories"
+        openPicker={openFilterPicker}
+        setOpenPicker={setOpenFilterPicker}
+        title="Categories camion"
+        placeholder="Selectionner"
+        options={visibleCategories}
+        selectedValues={selectedCategories}
+        searchValue={truckCategoryQuery}
+        onSearchChange={setTruckCategoryQuery}
+        onToggleValue={(value) => toggleValue(value, selectedCategories, setSelectedCategories)}
+      />
+
+      <FilterPicker
+        pickerKey="product-categories"
+        openPicker={openFilterPicker}
+        setOpenPicker={setOpenFilterPicker}
+        title="Categories produits"
+        placeholder="Selectionner"
+        options={visibleProductCategories}
+        selectedValues={selectedProductCategories}
+        searchValue={productCategoryQuery}
+        onSearchChange={setProductCategoryQuery}
+        onToggleValue={(value) =>
+          toggleValue(value, selectedProductCategories, setSelectedProductCategories)
+        }
+      />
+
+      <FilterPicker
+        pickerKey="models"
+        openPicker={openFilterPicker}
+        setOpenPicker={setOpenFilterPicker}
+        title="Modeles camion"
+        placeholder="Selectionner"
+        options={visibleModels}
+        selectedValues={selectedModels}
+        searchValue={modelQuery}
+        onSearchChange={setModelQuery}
+        onToggleValue={(value) => toggleValue(value, selectedModels, setSelectedModels)}
+      />
+
+      <div className="grid gap-3 rounded-sm border border-epct-ink/10 bg-[#fcfcfb] px-4 py-3">
+        <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-epct-ink/62">
+          Disponibilite
+        </p>
+        <div className="grid gap-2 pt-1">
+          {Object.entries(stockMeta).map(([value, meta]) => (
+            <label key={value} className="flex min-h-9 items-center gap-3 text-sm text-epct-ink/78">
+              <input
+                type="checkbox"
+                checked={selectedStockStatuses.includes(value)}
+                onChange={() => toggleValue(value, selectedStockStatuses, setSelectedStockStatuses)}
+                className="h-4 w-4 border-epct-ink/20 text-epct-green focus:ring-epct-green"
+              />
+              <span>{meta.label}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="grid gap-6">
       {filtersExpanded || activeFilterTags.length ? (
@@ -579,7 +693,7 @@ export function CatalogueExplorer({
               </label>
             </div>
 
-            <div className="flex justify-start lg:justify-end">
+            <div className="hidden justify-end lg:flex">
               <button
                 type="button"
                 onClick={toggleFiltersExpanded}
@@ -595,8 +709,24 @@ export function CatalogueExplorer({
             </div>
           </div>
 
+          <div className="flex items-center justify-between gap-3 lg:hidden">
+            <button
+              type="button"
+              onClick={openMobileFilters}
+              className="inline-flex h-11 items-center gap-2 rounded-sm border border-epct-ink/10 bg-[#fcfcfb] px-4 text-sm font-semibold text-epct-dark transition hover:border-epct-green/35 hover:text-epct-green"
+            >
+              <SlidersHorizontal className="h-4 w-4" />
+              <span>Filtres</span>
+              {hasActiveSelectionFilters ? (
+                <span className="inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-epct-green px-1 text-[10px] font-bold text-white">
+                  {activeFilterTags.length}
+                </span>
+              ) : null}
+            </button>
+          </div>
+
           <div
-            className={`grid transition-[grid-template-rows,opacity] duration-300 ease-out ${
+            className={`hidden transition-[grid-template-rows,opacity] duration-300 ease-out lg:grid ${
               filtersExpanded
                 ? 'grid-rows-[1fr] overflow-visible opacity-100'
                 : 'grid-rows-[0fr] overflow-hidden opacity-0'
@@ -604,90 +734,62 @@ export function CatalogueExplorer({
           >
             <div className="min-h-0">
               <div className="border-t border-epct-ink/10 pt-4">
-                <div className="grid gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))_1.15fr] lg:items-start">
-                  <FilterPicker
-                    pickerKey="brands"
-                    openPicker={openFilterPicker}
-                    setOpenPicker={setOpenFilterPicker}
-                    title="Marques"
-                    placeholder="Selectionner"
-                    options={filterableBrands}
-                    selectedValues={selectedBrands}
-                    searchValue={brandQuery}
-                    onSearchChange={setBrandQuery}
-                    onToggleValue={(value) => toggleValue(value, selectedBrands, setSelectedBrands)}
-                  />
-
-                  <FilterPicker
-                    pickerKey="truck-categories"
-                    openPicker={openFilterPicker}
-                    setOpenPicker={setOpenFilterPicker}
-                    title="Categories camion"
-                    placeholder="Selectionner"
-                    options={visibleCategories}
-                    selectedValues={selectedCategories}
-                    searchValue={truckCategoryQuery}
-                    onSearchChange={setTruckCategoryQuery}
-                    onToggleValue={(value) => toggleValue(value, selectedCategories, setSelectedCategories)}
-                  />
-
-                  <FilterPicker
-                    pickerKey="product-categories"
-                    openPicker={openFilterPicker}
-                    setOpenPicker={setOpenFilterPicker}
-                    title="Categories produits"
-                    placeholder="Selectionner"
-                    options={visibleProductCategories}
-                    selectedValues={selectedProductCategories}
-                    searchValue={productCategoryQuery}
-                    onSearchChange={setProductCategoryQuery}
-                    onToggleValue={(value) =>
-                      toggleValue(value, selectedProductCategories, setSelectedProductCategories)
-                    }
-                  />
-
-                  <FilterPicker
-                    pickerKey="models"
-                    openPicker={openFilterPicker}
-                    setOpenPicker={setOpenFilterPicker}
-                    title="Modeles camion"
-                    placeholder="Selectionner"
-                    options={visibleModels}
-                    selectedValues={selectedModels}
-                    searchValue={modelQuery}
-                    onSearchChange={setModelQuery}
-                    onToggleValue={(value) => toggleValue(value, selectedModels, setSelectedModels)}
-                  />
-
-                  <div className="grid gap-3 rounded-sm border border-epct-ink/10 bg-[#fcfcfb] px-4 py-3">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-epct-ink/62">
-                      Disponibilite
-                    </p>
-                    <div className="grid gap-2 pt-1">
-                      {Object.entries(stockMeta).map(([value, meta]) => (
-                        <label key={value} className="flex min-h-9 items-center gap-3 text-sm text-epct-ink/78">
-                          <input
-                            type="checkbox"
-                            checked={selectedStockStatuses.includes(value)}
-                            onChange={() => toggleValue(value, selectedStockStatuses, setSelectedStockStatuses)}
-                            className="h-4 w-4 border-epct-ink/20 text-epct-green focus:ring-epct-green"
-                          />
-                          <span>{meta.label}</span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                {filtersContent}
               </div>
             </div>
           </div>
         </div>
       </section>
 
+      {mobileFiltersOpen ? (
+        <div className="fixed inset-0 z-[70] lg:hidden">
+          <button
+            type="button"
+            aria-label="Fermer les filtres"
+            onClick={closeMobileFilters}
+            className="absolute inset-0 bg-black/35"
+          />
+          <div className="absolute inset-x-0 bottom-0 max-h-[82vh] overflow-hidden rounded-t-[1.5rem] bg-white shadow-[0_-20px_50px_rgba(16,24,40,0.18)]">
+            <div className="flex items-center justify-between border-b border-epct-ink/10 px-5 py-4">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-epct-green">
+                  Filtres
+                </p>
+                <p className="mt-1 text-sm text-epct-ink/62">Affinez votre recherche mobile</p>
+              </div>
+              <div className="flex items-center gap-2">
+                {hasActiveSelectionFilters ? (
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-red-200 bg-red-50 text-[#b42318]"
+                    aria-label="Reinitialiser les filtres"
+                  >
+                    <RotateCcw className="h-4 w-4" />
+                  </button>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={closeMobileFilters}
+                  className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-epct-ink/10 bg-white text-epct-dark"
+                  aria-label="Fermer"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="max-h-[calc(82vh-4.75rem)] overflow-y-auto px-5 py-5">
+              <div className="grid gap-4">{filtersContent}</div>
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <section className="grid content-start gap-6 border border-epct-ink/10 bg-[#f8f8f6] px-5 py-6 md:px-8 md:py-8">
         {visibleProducts.length ? (
           <>
-            <div className="flex justify-end">
+            <div className="hidden justify-end lg:flex">
               <div className="inline-flex items-center overflow-hidden rounded-sm border border-epct-ink/10 bg-white">
                 <button
                   type="button"

@@ -2,7 +2,7 @@ import type { GlobalConfig } from 'payload';
 
 export const GlobalSettings: GlobalConfig = {
   slug: 'global-settings',
-  label: 'Global settings',
+  label: 'Parametres du general',
   access: {
     read: () => true,
     update: () => true,

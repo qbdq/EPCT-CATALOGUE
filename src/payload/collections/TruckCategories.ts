@@ -4,6 +4,7 @@ import { publicRead } from '../access/publicRead.ts';
 import { slugField } from '../fields/slug.ts';
 import { seoFields } from '../fields/seo.ts';
 import { onDocChange, onDocDelete } from '../hooks/revalidate.ts';
+import { resolveTranslatedFields } from '../hooks/resolveTranslatedFields.ts';
 import UploadThumbnailCell from '../components/UploadThumbnailCell.tsx';
 
 export const TruckCategories: CollectionConfig = {
@@ -13,8 +14,8 @@ export const TruckCategories: CollectionConfig = {
     plural: 'Categories camion',
   },
   admin: {
-    useAsTitle: 'name',
-    defaultColumns: ['name', 'updatedAt', 'image'],
+    useAsTitle: 'name_fr',
+    defaultColumns: ['name_fr', 'updatedAt', 'image'],
     group: 'Catalogue',
     description: 'High-level machine families such as truck pumps, pump mixers, or stationary pumps.',
   },
@@ -25,6 +26,7 @@ export const TruckCategories: CollectionConfig = {
     delete: isAdmin,
   },
   hooks: {
+    afterRead: [resolveTranslatedFields(['name', 'description'])],
     afterChange: [onDocChange],
     afterDelete: [onDocDelete],
   },
@@ -36,17 +38,51 @@ export const TruckCategories: CollectionConfig = {
           label: 'Main info',
           fields: [
             {
-              name: 'name',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Truck category name',
+              type: 'row',
+              fields: [
+                {
+                  name: 'name_fr',
+                  type: 'text',
+                  required: true,
+                  label: 'Nom FR',
+                  admin: { width: '33%' },
+                },
+                {
+                  name: 'name_en',
+                  type: 'text',
+                  label: 'Nom EN',
+                  admin: { width: '33%' },
+                },
+                {
+                  name: 'name_ar',
+                  type: 'text',
+                  label: 'Nom AR',
+                  admin: { width: '33%' },
+                },
+              ],
             },
             {
-              name: 'description',
-              type: 'textarea',
-              localized: true,
-              label: 'Short description',
+              type: 'row',
+              fields: [
+                {
+                  name: 'description_fr',
+                  type: 'textarea',
+                  label: 'Description FR',
+                  admin: { width: '33%' },
+                },
+                {
+                  name: 'description_en',
+                  type: 'textarea',
+                  label: 'Description EN',
+                  admin: { width: '33%' },
+                },
+                {
+                  name: 'description_ar',
+                  type: 'textarea',
+                  label: 'Description AR',
+                  admin: { width: '33%' },
+                },
+              ],
             },
           ],
         },

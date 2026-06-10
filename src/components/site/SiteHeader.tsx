@@ -4,14 +4,25 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ChevronDown, LogOut, Menu, Search, Settings, Shield, User, X } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
-import { QuoteCartTray } from '@/components/catalogue/QuoteCartTray';
 import { NotificationsTray } from '@/components/notifications/NotificationsTray';
+import { QuoteCartTray } from '@/components/catalogue/QuoteCartTray';
 import { useSiteLocale, type SiteLocale } from './LocaleProvider';
+
+type ProductSearchResult = {
+  id: string;
+  name: string;
+  slug: string;
+  reference: string;
+  imageUrl: string;
+  alt: string;
+};
+
+const OVERLAY_EVENT = 'epct-overlay-open';
 
 const localeOptions = [
   { value: 'fr', code: 'FR', flag: '/img/countries/france.png', label: 'Francais' },
   { value: 'en', code: 'EN', flag: '/img/countries/united-states.png', label: 'English' },
-  { value: 'ar', code: 'AR', flag: '/img/countries/tunisia.png', label: 'العربية' },
+  { value: 'ar', code: 'AR', flag: '/img/countries/tunisia.png', label: 'Arabic' },
 ] as const;
 
 const copy = {
@@ -33,6 +44,9 @@ const copy = {
     adminPanel: 'Panneau admin',
     settings: 'Parametres',
     logout: 'Deconnexion',
+    searching: 'Recherche en cours...',
+    noResults: 'Aucun produit trouve.',
+    viewAll: 'Voir tous les resultats',
   },
   en: {
     nav: [
@@ -52,6 +66,9 @@ const copy = {
     adminPanel: 'Admin panel',
     settings: 'Settings',
     logout: 'Logout',
+    searching: 'Searching...',
+    noResults: 'No products found.',
+    viewAll: 'View all results',
   },
   ar: {
     nav: [
@@ -71,18 +88,115 @@ const copy = {
     adminPanel: 'لوحة الادارة',
     settings: 'الاعدادات',
     logout: 'تسجيل الخروج',
+    searching: 'جاري البحث...',
+    noResults: 'لا توجد منتجات مطابقة.',
+    viewAll: 'عرض كل النتائج',
   },
 } as const;
+
+function SearchBox({
+  query,
+  placeholder,
+  onChange,
+  results,
+  loading,
+  loadingLabel,
+  noResultsLabel,
+  viewAllLabel,
+  onResultClick,
+  large = false,
+}: {
+  query: string;
+  placeholder: string;
+  onChange: (value: string) => void;
+  results: ProductSearchResult[];
+  loading: boolean;
+  loadingLabel: string;
+  noResultsLabel: string;
+  viewAllLabel: string;
+  onResultClick: () => void;
+  large?: boolean;
+}) {
+  const showDropdown = query.trim().length >= 1;
+
+  return (
+    <div className="relative block w-full">
+      <Search
+        className={`pointer-events-none absolute top-1/2 -translate-y-1/2 text-epct-ink/45 dark:text-epct-dark-text/45 ${
+          large ? 'left-4 h-4 w-4' : 'left-3 h-4 w-4'
+        }`}
+      />
+      <input
+        type="search"
+        value={query}
+        onChange={(event) => onChange(event.target.value)}
+        placeholder={placeholder}
+        className={`w-full rounded-full border border-epct-green/20 bg-epct-bg text-sm text-epct-ink outline-none transition placeholder:text-epct-ink/45 focus:border-epct-green/45 dark:border-epct-lime/25 dark:bg-white/5 dark:text-epct-dark-text ${
+          large ? 'h-10 pl-11 pr-4' : 'h-9 pl-9 pr-3'
+        }`}
+      />
+
+      {showDropdown ? (
+        <div className="absolute left-0 right-0 top-[calc(100%+10px)] z-50 min-w-[18rem] overflow-hidden rounded-sm border border-epct-ink/10 bg-white shadow-[0_18px_40px_rgba(16,24,40,0.12)] sm:min-w-0">
+          {loading ? (
+            <div className="px-4 py-3 text-sm text-epct-ink/62">{loadingLabel}</div>
+          ) : results.length ? (
+            <>
+              <div className="grid">
+                {results.map((result) => (
+                  <Link
+                    key={result.id}
+                    href={`/catalogue/${result.slug}`}
+                    onClick={onResultClick}
+                    className="grid grid-cols-[56px_minmax(0,1fr)] items-center gap-3 border-b border-epct-ink/8 px-3 py-3 transition hover:bg-epct-green/5 last:border-b-0"
+                  >
+                    <div className="overflow-hidden rounded-sm border border-epct-ink/10 bg-neutral-100">
+                      <img src={result.imageUrl} alt={result.alt} className="h-14 w-14 object-cover" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-epct-dark">{result.name}</p>
+                      <p className="mt-1 truncate text-xs uppercase tracking-[0.08em] text-epct-green/85">
+                        Ref. {result.reference}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+              <Link
+                href={`/catalogue?q=${encodeURIComponent(query)}`}
+                onClick={onResultClick}
+                className="flex min-h-11 items-center justify-center border-t border-epct-ink/8 bg-[#fcfcfb] px-4 text-sm font-semibold text-epct-green transition hover:bg-epct-green/6"
+              >
+                {viewAllLabel}
+              </Link>
+            </>
+          ) : (
+            <div className="px-4 py-3 text-sm text-epct-ink/62">{noResultsLabel}</div>
+          )}
+        </div>
+      ) : null}
+    </div>
+  );
+}
 
 export function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<ProductSearchResult[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const { locale, setLocale } = useSiteLocale();
   const userMenuRef = useRef<HTMLDivElement | null>(null);
   const languageMenuRef = useRef<HTMLDivElement | null>(null);
+  const mobileSearchRef = useRef<HTMLDivElement | null>(null);
+  const desktopSearchRef = useRef<HTMLDivElement | null>(null);
   const currentCopy = copy[locale];
   const currentLocale = localeOptions.find((option) => option.value === locale) ?? localeOptions[0];
+
+  function announceOverlay(kind: string) {
+    window.dispatchEvent(new CustomEvent(OVERLAY_EVENT, { detail: { kind } }));
+  }
 
   useEffect(() => {
     function onDocumentClick(event: MouseEvent) {
@@ -93,17 +207,101 @@ export function SiteHeader() {
       if (!languageMenuRef.current?.contains(event.target as Node)) {
         setLanguageMenuOpen(false);
       }
+
+      const clickedInsideSearch =
+        mobileSearchRef.current?.contains(event.target as Node) ||
+        desktopSearchRef.current?.contains(event.target as Node);
+
+      if (!clickedInsideSearch) {
+        setSearchQuery('');
+        setSearchResults([]);
+      }
     }
 
     document.addEventListener('mousedown', onDocumentClick);
     return () => document.removeEventListener('mousedown', onDocumentClick);
   }, []);
 
+  useEffect(() => {
+    function onOverlayOpen(event: Event) {
+      const detail = (event as CustomEvent<{ kind?: string }>).detail;
+      const kind = detail?.kind;
+
+      if (kind !== 'header-search') {
+        setSearchQuery('');
+        setSearchResults([]);
+      }
+
+      if (kind !== 'header-user') {
+        setUserMenuOpen(false);
+      }
+
+      if (kind !== 'header-language') {
+        setLanguageMenuOpen(false);
+      }
+
+      if (kind !== 'header-mobile-menu') {
+        setMobileMenuOpen(false);
+      }
+    }
+
+    window.addEventListener(OVERLAY_EVENT, onOverlayOpen as EventListener);
+    return () => window.removeEventListener(OVERLAY_EVENT, onOverlayOpen as EventListener);
+  }, []);
+
+  useEffect(() => {
+    const normalized = searchQuery.trim();
+
+    if (normalized.length < 1) {
+      setSearchResults([]);
+      setSearchLoading(false);
+      return;
+    }
+
+    announceOverlay('header-search');
+
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        setSearchLoading(true);
+        const response = await fetch(
+          `/api/product-search?q=${encodeURIComponent(normalized)}&locale=${locale}`,
+          { signal: controller.signal },
+        );
+
+        if (!response.ok) {
+          setSearchResults([]);
+          return;
+        }
+
+        const json = (await response.json()) as { results?: ProductSearchResult[] };
+        setSearchResults(Array.isArray(json.results) ? json.results : []);
+      } catch (error) {
+        if ((error as Error).name !== 'AbortError') {
+          setSearchResults([]);
+        }
+      } finally {
+        setSearchLoading(false);
+      }
+    }, 220);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [locale, searchQuery]);
+
   function switchLocale(nextLocale: SiteLocale) {
     setLocale(nextLocale);
     setLanguageMenuOpen(false);
     setMobileMenuOpen(false);
     window.location.reload();
+  }
+
+  function handleSearchResultClick() {
+    setSearchQuery('');
+    setSearchResults([]);
+    setMobileMenuOpen(false);
   }
 
   return (
@@ -116,36 +314,51 @@ export function SiteHeader() {
               alt="EPCT logo"
               width={820}
               height={220}
-              className="h-12 w-auto object-contain mix-blend-multiply dark:mix-blend-normal dark:brightness-0 dark:invert sm:h-[5.45rem]"
+              className="h-10 w-auto object-contain mix-blend-multiply dark:mix-blend-normal dark:brightness-0 dark:invert sm:h-[5.45rem]"
               priority
             />
           </Link>
 
-          <div className="flex flex-1 justify-center px-2 sm:px-4 md:hidden">
-            <label className="relative block w-full max-w-[16rem]">
-              <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-epct-ink/45" />
-              <input
-                type="search"
+          <div className="flex flex-1 justify-center px-2 sm:px-4 md:hidden" ref={mobileSearchRef}>
+            <div className="w-full max-w-[20rem]">
+              <SearchBox
+                query={searchQuery}
                 placeholder={currentCopy.searchMobile}
-                className="h-9 w-full rounded-full border border-epct-green/20 bg-epct-bg pl-9 pr-3 text-sm text-epct-ink outline-none transition placeholder:text-epct-ink/45 focus:border-epct-green/45"
+                onChange={setSearchQuery}
+                results={searchResults}
+                loading={searchLoading}
+                loadingLabel={currentCopy.searching}
+                noResultsLabel={currentCopy.noResults}
+                viewAllLabel={currentCopy.viewAll}
+                onResultClick={handleSearchResultClick}
               />
-            </label>
+            </div>
           </div>
 
-          <div className="hidden flex-1 justify-center md:flex">
-            <label className="relative block w-full max-w-[30rem]">
-              <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-epct-ink/45 dark:text-epct-dark-text/45" />
-              <input
-                type="search"
+          <div className="hidden flex-1 justify-center md:flex" ref={desktopSearchRef}>
+            <div className="w-full max-w-[30rem]">
+              <SearchBox
+                query={searchQuery}
                 placeholder={currentCopy.searchDesktop}
-                className="h-10 w-full rounded-full border border-epct-green/20 bg-epct-bg pl-11 pr-4 text-sm text-epct-ink outline-none ring-0 transition placeholder:text-epct-ink/45 focus:border-epct-green/45 dark:border-epct-lime/25 dark:bg-white/5 dark:text-epct-dark-text"
+                onChange={setSearchQuery}
+                results={searchResults}
+                loading={searchLoading}
+                loadingLabel={currentCopy.searching}
+                noResultsLabel={currentCopy.noResults}
+                viewAllLabel={currentCopy.viewAll}
+                onResultClick={handleSearchResultClick}
+                large
               />
-            </label>
+            </div>
           </div>
 
           <div className="ml-auto flex shrink-0 items-center gap-2">
             <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              onClick={() => {
+                const nextOpen = !mobileMenuOpen;
+                if (nextOpen) announceOverlay('header-mobile-menu');
+                setMobileMenuOpen(nextOpen);
+              }}
               className="flex h-9 w-9 items-center justify-center rounded-full border border-epct-green/35 text-epct-dark transition hover:bg-epct-green hover:text-white md:hidden"
               aria-label={mobileMenuOpen ? currentCopy.closeMenu : currentCopy.openMenu}
             >
@@ -155,14 +368,18 @@ export function SiteHeader() {
             <div className="relative hidden sm:block" ref={languageMenuRef}>
               <button
                 type="button"
-                onClick={() => setLanguageMenuOpen((current) => !current)}
+                onClick={() => {
+                  const nextOpen = !languageMenuOpen;
+                  if (nextOpen) announceOverlay('header-language');
+                  setLanguageMenuOpen(nextOpen);
+                }}
                 aria-label={currentCopy.language}
                 className="inline-flex min-h-10 items-center gap-2 rounded-full border border-epct-green/25 bg-white px-3 py-1 text-xs font-semibold tracking-wide text-epct-ink/80 transition hover:border-epct-green/45 dark:border-epct-lime/30 dark:bg-transparent dark:text-epct-dark-text/80"
               >
                 <span className="h-4 w-5 overflow-hidden rounded-[2px]">
                   <img
                     src={currentLocale.flag}
-                    alt={currentLocale.label ? `${currentLocale.label} flag` : 'Language flag'}
+                    alt={`${currentLocale.label} flag`}
                     className="h-full w-full object-cover"
                   />
                 </span>
@@ -186,11 +403,7 @@ export function SiteHeader() {
                       }`}
                     >
                       <span className="h-4 w-5 overflow-hidden rounded-[2px]">
-                        <img
-                          src={option.flag}
-                          alt={option.label ? `${option.label} flag` : 'Language flag'}
-                          className="h-full w-full object-cover"
-                        />
+                        <img src={option.flag} alt={`${option.label} flag`} className="h-full w-full object-cover" />
                       </span>
                       <span>{option.code}</span>
                     </button>
@@ -205,7 +418,11 @@ export function SiteHeader() {
             <div className="relative" ref={userMenuRef}>
               <button
                 type="button"
-                onClick={() => setUserMenuOpen((current) => !current)}
+                onClick={() => {
+                  const nextOpen = !userMenuOpen;
+                  if (nextOpen) announceOverlay('header-user');
+                  setUserMenuOpen(nextOpen);
+                }}
                 className="flex h-9 w-9 items-center justify-center rounded-full border border-epct-green/35 text-epct-dark transition hover:bg-epct-green hover:text-white dark:border-epct-lime/35 dark:text-epct-dark-text dark:hover:bg-epct-lime/20"
                 aria-label={currentCopy.account}
               >
@@ -255,7 +472,7 @@ export function SiteHeader() {
           ))}
         </nav>
 
-        {mobileMenuOpen && (
+        {mobileMenuOpen ? (
           <nav className="absolute left-0 right-0 top-full z-50 border-b border-epct-green/15 bg-white p-4 shadow-xl md:hidden dark:border-epct-green/20 dark:bg-epct-dark-bg">
             <div className="flex flex-col gap-3">
               {currentCopy.nav.map((item) => (
@@ -284,11 +501,7 @@ export function SiteHeader() {
                     >
                       <span className="flex items-center gap-2">
                         <span className="h-4 w-5 overflow-hidden rounded-[2px]">
-                          <img
-                            src={option.flag}
-                            alt={option.label ? `${option.label} flag` : 'Language flag'}
-                            className="h-full w-full object-cover"
-                          />
+                          <img src={option.flag} alt={`${option.label} flag`} className="h-full w-full object-cover" />
                         </span>
                         <span>{option.label}</span>
                       </span>
@@ -299,7 +512,7 @@ export function SiteHeader() {
               </div>
             </div>
           </nav>
-        )}
+        ) : null}
       </div>
     </header>
   );

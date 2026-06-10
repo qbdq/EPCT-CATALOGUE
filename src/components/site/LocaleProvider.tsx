@@ -19,13 +19,27 @@ function resolveLocale(value: string | null | undefined): SiteLocale {
   return 'fr';
 }
 
-export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<SiteLocale>(() => {
-    if (typeof window === 'undefined') return 'fr';
-    return resolveLocale(window.localStorage.getItem(STORAGE_KEY));
-  });
+export function LocaleProvider({
+  children,
+  initialLocale = 'fr',
+}: {
+  children: ReactNode;
+  initialLocale?: SiteLocale;
+}) {
+  const [locale, setLocaleState] = useState<SiteLocale>(initialLocale);
 
   useEffect(() => {
+    const storedLocale = resolveLocale(window.localStorage.getItem(STORAGE_KEY));
+
+    if (storedLocale !== locale) {
+      setLocaleState(storedLocale);
+      document.documentElement.lang = storedLocale;
+      document.documentElement.dir = storedLocale === 'ar' ? 'rtl' : 'ltr';
+      return;
+    }
+
+    window.localStorage.setItem(STORAGE_KEY, locale);
+    document.cookie = `${COOKIE_KEY}=${locale}; path=/; max-age=31536000; samesite=lax`;
     document.documentElement.lang = locale;
     document.documentElement.dir = locale === 'ar' ? 'rtl' : 'ltr';
   }, [locale]);

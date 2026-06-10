@@ -4,6 +4,16 @@ import { publicRead } from '../access/publicRead.ts';
 import { slugField } from '../fields/slug.ts';
 import { seoFields } from '../fields/seo.ts';
 import { onDocChange, onDocDelete } from '../hooks/revalidate.ts';
+import { resolveTranslatedFields } from '../hooks/resolveTranslatedFields.ts';
+
+const fallbackAltFromFilename = (filename?: string | null) => {
+  if (!filename) return undefined;
+
+  const baseName = filename.replace(/\.[^/.]+$/, '');
+  const normalized = baseName.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+  return normalized || undefined;
+};
 
 export const Products: CollectionConfig = {
   slug: 'products',
@@ -12,9 +22,9 @@ export const Products: CollectionConfig = {
     plural: 'Produits',
   },
   admin: {
-    useAsTitle: 'name',
+    useAsTitle: 'name_fr',
     defaultColumns: [
-      'name',
+      'name_fr',
       'reference',
       'category',
       'brand',
@@ -34,6 +44,51 @@ export const Products: CollectionConfig = {
     delete: isAdmin,
   },
   hooks: {
+    beforeValidate: [
+      async ({ data, req }) => {
+        if (!data || typeof data !== 'object' || !Array.isArray(data.images)) return data;
+
+        const nextImages = await Promise.all(
+          data.images.map(async (item: Record<string, unknown>) => {
+            if (!item || typeof item !== 'object' || item.alt) return item;
+
+            const imageValue = item.image;
+            const imageId =
+              typeof imageValue === 'string'
+                ? imageValue
+                : imageValue && typeof imageValue === 'object' && 'id' in imageValue
+                  ? String(imageValue.id)
+                  : null;
+
+            if (!imageId) return item;
+
+            try {
+              const mediaDoc = await req.payload.findByID({
+                collection: 'media',
+                id: imageId,
+                depth: 0,
+              });
+
+              return {
+                ...item,
+                alt: fallbackAltFromFilename(mediaDoc?.filename) ?? 'Product image',
+              };
+            } catch {
+              return {
+                ...item,
+                alt: 'Product image',
+              };
+            }
+          }),
+        );
+
+        return {
+          ...data,
+          images: nextImages,
+        };
+      },
+    ],
+    afterRead: [resolveTranslatedFields(['name', 'shortDescription', 'fullDescription', 'additionalInfo'])],
     afterChange: [onDocChange],
     afterDelete: [onDocDelete],
   },
@@ -48,13 +103,28 @@ export const Products: CollectionConfig = {
               type: 'row',
               fields: [
                 {
-                  name: 'name',
+                  name: 'name_fr',
                   type: 'text',
                   required: true,
-                  localized: true,
-                  label: 'Product name',
+                  label: 'Nom FR',
                   admin: {
-                    width: '70%',
+                    width: '23.33%',
+                  },
+                },
+                {
+                  name: 'name_en',
+                  type: 'text',
+                  label: 'Nom EN',
+                  admin: {
+                    width: '23.33%',
+                  },
+                },
+                {
+                  name: 'name_ar',
+                  type: 'text',
+                  label: 'Nom AR',
+                  admin: {
+                    width: '23.34%',
                   },
                 },
                 {
@@ -71,26 +141,61 @@ export const Products: CollectionConfig = {
               ],
             },
             {
-              name: 'shortDescription',
-              type: 'textarea',
-              required: true,
-              localized: true,
-              label: 'Short description',
-              admin: {
-                description: 'Quick summary shown in cards and listings.',
-              },
+              type: 'row',
+              fields: [
+                {
+                  name: 'shortDescription_fr',
+                  type: 'textarea',
+                  required: true,
+                  label: 'Description courte FR',
+                  admin: {
+                    width: '33%',
+                    description: 'Quick summary shown in cards and listings.',
+                  },
+                },
+                {
+                  name: 'shortDescription_en',
+                  type: 'textarea',
+                  label: 'Description courte EN',
+                  admin: { width: '33%' },
+                },
+                {
+                  name: 'shortDescription_ar',
+                  type: 'textarea',
+                  label: 'Description courte AR',
+                  admin: { width: '33%' },
+                },
+              ],
             },
             {
-              name: 'fullDescription',
+              name: 'fullDescription_fr',
               type: 'richText',
-              localized: true,
-              label: 'Detailed description',
+              label: 'Description detaillee FR',
             },
             {
-              name: 'additionalInfo',
+              name: 'fullDescription_en',
               type: 'richText',
-              localized: true,
-              label: 'Additional information',
+              label: 'Description detaillee EN',
+            },
+            {
+              name: 'fullDescription_ar',
+              type: 'richText',
+              label: 'Description detaillee AR',
+            },
+            {
+              name: 'additionalInfo_fr',
+              type: 'richText',
+              label: 'Informations complementaires FR',
+            },
+            {
+              name: 'additionalInfo_en',
+              type: 'richText',
+              label: 'Informations complementaires EN',
+            },
+            {
+              name: 'additionalInfo_ar',
+              type: 'richText',
+              label: 'Informations complementaires AR',
             },
           ],
         },
@@ -215,8 +320,11 @@ export const Products: CollectionConfig = {
                 {
                   name: 'alt',
                   type: 'text',
-                  required: true,
                   label: 'Alt text',
+                  admin: {
+                    description:
+                      'If left empty, it will be generated automatically from the image filename.',
+                  },
                 },
               ],
             },

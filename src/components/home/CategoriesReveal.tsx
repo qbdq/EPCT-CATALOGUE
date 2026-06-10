@@ -1,234 +1,195 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import Image from 'next/image';
+import Link from 'next/link';
+import { ArrowUpRight } from 'lucide-react';
 import { useSiteLocale } from '@/components/site/LocaleProvider';
 
-const LIME = '#A3E635';
-
-const rightPanels = [
-  {
-    image: '/img/segment_1.png',
-    stat: { value: '500+' },
-  },
-  {
-    image: '/img/segment_2.jpg',
-    stat: { value: '300+' },
-  },
-  {
-    image: '/img/segment_3.jpg',
-    stat: { value: '200+' },
-  },
-];
+const segmentImages = ['/img/segment_1.png', '/img/segment_2.jpg', '/img/segment_3.jpg'];
 
 export function CategoriesReveal() {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const panelRefs = useRef<(HTMLDivElement | null)[]>([]);
   const { locale } = useSiteLocale();
 
   const copy = {
     fr: {
       eyebrow: 'Catalogue EPCT',
       title: 'Nos segments',
-      categories: [
+      intro:
+        "EPCT organise son offre par famille d'equipements pour aider vos equipes a identifier plus vite les bonnes pieces, les bonnes references et les bonnes compatibilites.",
+      statsLabel: 'References disponibles',
+      cta: 'Consulter',
+      segments: [
         {
           number: '01',
           label: 'Toupies & Malaxeurs',
           href: '/catalogue?category=toupie',
-          desc: 'Pieces de transmission, tambour, couronne dentee et reducteurs pour toutes marques de toupies beton.',
+          desc: 'Couronnes, galets, reducteurs, joints et pieces de rotation pour toupies et malaxeurs beton.',
           parts: ['Couronnes', 'Galets porteurs', 'Reducteurs', "Joints d'etancheite"],
-          statLabel: 'References toupies',
+          stat: '500+',
         },
         {
           number: '02',
           label: 'Pompes a beton',
           href: '/catalogue?category=pompe-beton',
-          desc: "Pistons, spheres de clapet, plaques d'usure, tubes en S et joints hydrauliques pour pompes sur camion.",
-          parts: ['Pistons hydrauliques', 'Spheres de clapet', 'Tubes en S', "Plaques d'usure"],
-          statLabel: 'References pompes',
+          desc: "Pistons, plaques d'usure, spheres de clapet, tubes en S et composants hydrauliques de pompage.",
+          parts: ['Pistons', 'Spheres', 'Tubes en S', "Plaques d'usure"],
+          stat: '300+',
         },
         {
           number: '03',
           label: 'Centrales a beton',
           href: '/catalogue?category=centrale-beton',
-          desc: 'Doseurs, tapis doseurs, vis sans fin, capteurs de pesage et actionneurs pour centrales a beton.',
-          parts: ['Vis sans fin', 'Tapis doseurs', 'Capteurs de pesage', 'Actionneurs'],
-          statLabel: 'References centrales',
+          desc: 'Doseurs, vis sans fin, capteurs, tapis et actionneurs pour equipements de centrale a beton.',
+          parts: ['Vis sans fin', 'Tapis doseurs', 'Capteurs', 'Actionneurs'],
+          stat: '200+',
         },
       ],
-      segment: 'Segment',
-      cta: 'Voir les pieces →',
     },
     en: {
       eyebrow: 'EPCT catalogue',
       title: 'Our segments',
-      categories: [
+      intro:
+        'EPCT structures its offer by equipment family so your teams can identify the right parts, references and compatibilities more quickly.',
+      statsLabel: 'Available references',
+      cta: 'Browse',
+      segments: [
         {
           number: '01',
           label: 'Mixers',
           href: '/catalogue?category=toupie',
-          desc: 'Transmission parts, drums, ring gears and reducers for all concrete mixer brands.',
-          parts: ['Ring gears', 'Support rollers', 'Reducers', 'Sealing joints'],
-          statLabel: 'Mixer references',
+          desc: 'Ring gears, rollers, reducers, seals and rotation parts for concrete mixers and drums.',
+          parts: ['Ring gears', 'Support rollers', 'Reducers', 'Seals'],
+          stat: '500+',
         },
         {
           number: '02',
           label: 'Concrete pumps',
           href: '/catalogue?category=pompe-beton',
-          desc: 'Pistons, valve balls, wear plates, S tubes and hydraulic seals for truck-mounted pumps.',
-          parts: ['Hydraulic pistons', 'Valve balls', 'S tubes', 'Wear plates'],
-          statLabel: 'Pump references',
+          desc: 'Pistons, wear plates, valve balls, S tubes and hydraulic pumping components.',
+          parts: ['Pistons', 'Valve balls', 'S tubes', 'Wear plates'],
+          stat: '300+',
         },
         {
           number: '03',
           label: 'Batching plants',
           href: '/catalogue?category=centrale-beton',
-          desc: 'Feeders, weighing belts, screw conveyors, load cells and actuators for batching plants.',
-          parts: ['Screw conveyors', 'Weighing belts', 'Load cells', 'Actuators'],
-          statLabel: 'Plant references',
+          desc: 'Feeders, screw conveyors, load cells, belts and actuators for batching plant equipment.',
+          parts: ['Screw conveyors', 'Belts', 'Load cells', 'Actuators'],
+          stat: '200+',
         },
       ],
-      segment: 'Segment',
-      cta: 'View parts →',
     },
     ar: {
       eyebrow: 'كتالوج EPCT',
       title: 'فئاتنا',
-      categories: [
+      intro:
+        'تنظم EPCT عرضها حسب عائلات المعدات حتى تتمكن فرقكم من الوصول بسرعة الى القطع والمراجع والتوافقات المناسبة.',
+      statsLabel: 'مراجع متوفرة',
+      cta: 'تصفح',
+      segments: [
         {
           number: '01',
           label: 'الخلاطات',
           href: '/catalogue?category=toupie',
-          desc: 'قطع نقل الحركة والاسطوانة والتاج المسنن والمخفضات لمختلف علامات خلاطات الخرسانة.',
-          parts: ['تيجان مسننة', 'بكرات حاملة', 'مخفضات', 'حشوات عزل'],
-          statLabel: 'مراجع الخلاطات',
+          desc: 'تيجان مسننة وبكرات ومخفضات وحشوات وقطع دوران للخلاطات ومعدات المزج.',
+          parts: ['تيجان', 'بكرات', 'مخفضات', 'حشوات'],
+          stat: '500+',
         },
         {
           number: '02',
           label: 'مضخات الخرسانة',
           href: '/catalogue?category=pompe-beton',
-          desc: 'مكابس وكرات صمامات وصفائح تآكل وانابيب S وحشوات هيدروليكية لمضخات الشاحنات.',
-          parts: ['مكابس هيدروليكية', 'كرات صمامات', 'انابيب S', 'صفائح تآكل'],
-          statLabel: 'مراجع المضخات',
+          desc: 'مكابس وصفائح تآكل وكرات صمامات وانابيب S ومكونات هيدروليكية للضخ.',
+          parts: ['مكابس', 'كرات صمامات', 'انابيب S', 'صفائح تآكل'],
+          stat: '300+',
         },
         {
           number: '03',
           label: 'محطات الخرسانة',
           href: '/catalogue?category=centrale-beton',
-          desc: 'مغذيات وسيور وزن ولولب نقل وخلايا وزن ومشغلات لمحطات الخرسانة.',
-          parts: ['لولب نقل', 'سيور وزن', 'خلايا وزن', 'مشغلات'],
-          statLabel: 'مراجع المحطات',
+          desc: 'مغذيات ولولب نقل وخلايا وزن وسيور ومشغلات لمعدات محطات الخرسانة.',
+          parts: ['لولب نقل', 'سيور', 'خلايا وزن', 'مشغلات'],
+          stat: '200+',
         },
       ],
-      segment: 'الفئة',
-      cta: 'عرض القطع ←',
     },
   }[locale];
 
-  useEffect(() => {
-    const observers: IntersectionObserver[] = [];
-    panelRefs.current.forEach((el, i) => {
-      if (!el) return;
-      const obs = new IntersectionObserver(([entry]) => {
-        if (entry.isIntersecting) setActiveIndex(i);
-      }, { threshold: 0.5 });
-
-      obs.observe(el);
-      observers.push(obs);
-    });
-
-    return () => observers.forEach((o) => o.disconnect());
-  }, []);
-
   return (
-    <section className="w-full bg-epct-dark py-0">
-      <div className="px-4 pt-12 text-center sm:px-6 md:px-14 md:pt-16">
-        <p className="font-display text-xs uppercase tracking-[0.45em] sm:text-sm" style={{ color: LIME }}>
-          {copy.eyebrow}
-        </p>
-        <h2 className="mt-2 font-display text-3xl font-black uppercase text-white sm:mt-3 sm:text-5xl md:text-6xl">
-          {copy.title}
-        </h2>
-      </div>
+    <section className="w-full bg-[#0a2015] px-5 py-16 text-white md:px-10 md:py-20">
+      <div className="mx-auto w-full max-w-7xl">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="font-display text-xs uppercase tracking-[0.32em] text-epct-lime sm:text-sm">
+            {copy.eyebrow}
+          </p>
+          <h2 className="mt-3 font-display text-4xl font-black uppercase tracking-tight sm:text-5xl md:text-6xl">
+            {copy.title}
+          </h2>
+          <p className="mx-auto mt-4 max-w-3xl text-sm leading-relaxed text-white/72 sm:text-base md:text-lg">
+            {copy.intro}
+          </p>
+        </div>
 
-      <div className="mx-auto max-w-[1500px] px-5 md:px-8">
-        <div className="min-w-0">
-          {copy.categories.map((cat, i) => (
-            <div
-              key={cat.number}
-              ref={(el) => {
-                panelRefs.current[i] = el;
-              }}
-              className="flex min-h-[70vh] items-center py-8 sm:h-screen sm:py-0"
+        <div className="mt-10 grid gap-6 lg:grid-cols-3 lg:gap-7">
+          {copy.segments.map((segment, index) => (
+            <article
+              key={segment.number}
+              className="overflow-hidden border border-white/10 bg-white/95 text-epct-dark shadow-[0_30px_60px_-36px_rgba(0,0,0,0.65)]"
             >
-              <div className="relative h-[65vh] min-h-[480px] w-full overflow-hidden rounded-2xl border border-white/20 shadow-[0_30px_70px_-30px_rgba(0,0,0,0.65)] sm:h-[80vh] sm:min-h-[620px] sm:rounded-[2.2rem]">
+              <div className="relative aspect-[16/10] overflow-hidden bg-[#edf2ec]">
                 <Image
-                  src={rightPanels[i].image}
-                  alt={`${copy.segment} ${cat.number}`}
+                  src={segmentImages[index]}
+                  alt={segment.label}
                   width={1600}
-                  height={1200}
-                  sizes="(max-width: 1024px) 100vw, 92vw"
+                  height={1000}
+                  sizes="(min-width: 1024px) 30vw, 100vw"
                   className="h-full w-full object-cover"
-                  priority={i === 0}
+                  priority={index === 0}
                 />
-                <div className="pointer-events-none absolute inset-0 bg-gradient-to-r from-[#04170d]/90 via-[#052114]/62 to-[#04170d]/44" />
-
-                <div className="relative z-10 flex h-full items-end p-4 sm:p-5 md:p-8">
-                  <div
-                    className="w-full max-w-3xl rounded-xl border border-[#87c728]/45 px-4 py-4 sm:rounded-[1.6rem] sm:px-6 sm:py-6 md:px-8 md:py-8"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(31,122,77,0.96), rgba(24,94,58,0.96))',
-                      boxShadow: '0 20px 55px -30px rgba(0,0,0,0.8)',
-                      opacity: i === activeIndex ? 1 : 0.42,
-                    }}
-                  >
-                    <p className="font-display text-[3rem] font-black leading-none tracking-tighter text-[#d6fb7f] sm:text-[4.8rem] md:text-[6.2rem]">
-                      {cat.number}
-                    </p>
-
-                    <span className="mt-2 inline-block rounded-full border border-white/35 bg-white/10 px-4 py-1.5 text-sm uppercase tracking-[0.24em] text-white/90">
-                      {copy.segment} {cat.number}
-                    </span>
-
-                    <h3 className="mt-3 font-display text-2xl font-black uppercase leading-tight text-white sm:mt-4 sm:text-4xl md:text-5xl">
-                      {cat.label}
-                    </h3>
-
-                    <p className="mt-3 text-sm leading-relaxed text-white/90 sm:mt-4 sm:text-lg md:text-xl">
-                      {cat.desc}
-                    </p>
-
-                    <div className="mt-4 flex flex-wrap gap-2 sm:mt-5 sm:gap-2.5">
-                      {cat.parts.map((part) => (
-                        <span
-                          key={part}
-                          className="rounded border border-white/30 bg-white/10 px-2 py-1 text-[10px] uppercase tracking-wider text-white/95 sm:px-3 sm:py-1.5 sm:text-xs"
-                        >
-                          {part}
-                        </span>
-                      ))}
-                    </div>
-
-                    <div className="mt-4 flex flex-wrap items-center gap-3 sm:mt-6 sm:gap-4">
-                      <p className="font-display text-3xl font-black text-[#d6fb7f] sm:text-4xl md:text-5xl">
-                        {rightPanels[i].stat.value}
-                      </p>
-                      <p className="text-[10px] uppercase tracking-[0.23em] text-white/85 sm:text-xs md:text-sm">
-                        {cat.statLabel}
-                      </p>
-                    </div>
-
-                    <Link
-                      href={cat.href}
-                      className="mt-4 inline-flex items-center gap-2 rounded-full bg-[#d6fb7f] px-4 py-2 text-xs font-semibold uppercase tracking-wider text-epct-ink sm:mt-6 sm:px-6 sm:py-3 sm:text-sm"
-                    >
-                      {copy.cta}
-                    </Link>
+                <div className="absolute inset-0 bg-gradient-to-t from-[#07180f]/72 via-transparent to-transparent" />
+                <div className="absolute left-4 top-4 inline-flex min-h-10 items-center bg-epct-green px-3 text-sm font-bold tracking-[0.14em] text-white">
+                  {segment.number}
+                </div>
+                <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-4">
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.22em] text-white/70">{copy.statsLabel}</p>
+                    <p className="mt-1 font-display text-3xl font-black text-white">{segment.stat}</p>
                   </div>
                 </div>
               </div>
-            </div>
+
+              <div className="grid gap-5 px-5 py-5 sm:px-6 sm:py-6">
+                <div>
+                  <h3 className="font-display text-2xl font-black uppercase tracking-tight text-epct-dark sm:text-3xl">
+                    {segment.label}
+                  </h3>
+                  <p className="mt-3 text-sm leading-relaxed text-epct-ink/74 sm:text-[15px]">
+                    {segment.desc}
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  {segment.parts.map((part) => (
+                    <span
+                      key={part}
+                      className="inline-flex min-h-8 items-center bg-[#f3f6f1] px-3 text-[11px] font-semibold uppercase tracking-[0.08em] text-epct-ink/76"
+                    >
+                      {part}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="flex items-center justify-between border-t border-epct-ink/10 pt-4">
+                  <Link
+                    href={segment.href}
+                    className="inline-flex min-h-11 items-center gap-2 bg-epct-lime px-4 text-sm font-semibold uppercase tracking-[0.08em] text-epct-ink transition hover:brightness-95"
+                  >
+                    {copy.cta}
+                    <ArrowUpRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              </div>
+            </article>
           ))}
         </div>
       </div>

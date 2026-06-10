@@ -1,12 +1,17 @@
 import type { Field } from 'payload';
 import { slugify } from '../hooks/slugify.ts';
 
-export const slugField = (label = 'Slug'): Field => ({
+type SlugFieldOptions = {
+  localized?: boolean;
+  description?: string;
+};
+
+export const slugField = (label = 'Slug', options: SlugFieldOptions = {}): Field => ({
   name: 'slug',
   type: 'text',
   label,
   required: true,
-  localized: true,
+  localized: options.localized ?? true,
   unique: true,
   index: true,
   hooks: {
@@ -15,6 +20,7 @@ export const slugField = (label = 'Slug'): Field => ({
   admin: {
     position: 'sidebar',
     description:
+      options.description ||
       'Generated automatically from the localized name or title, with the locale suffix added at the end.',
   },
 });

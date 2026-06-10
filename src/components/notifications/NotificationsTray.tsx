@@ -20,6 +20,8 @@ type NotificationsTrayProps = {
   mode?: 'frontend' | 'admin';
 };
 
+const OVERLAY_EVENT = 'epct-overlay-open';
+
 function formatDate(value?: string) {
   if (!value) return '';
 
@@ -67,6 +69,18 @@ export function NotificationsTray({ mode = 'frontend' }: NotificationsTrayProps)
 
     document.addEventListener('mousedown', onDocumentClick);
     return () => document.removeEventListener('mousedown', onDocumentClick);
+  }, []);
+
+  useEffect(() => {
+    function onOverlayOpen(event: Event) {
+      const detail = (event as CustomEvent<{ kind?: string }>).detail;
+      if (detail?.kind !== 'notifications-tray') {
+        setOpen(false);
+      }
+    }
+
+    window.addEventListener(OVERLAY_EVENT, onOverlayOpen as EventListener);
+    return () => window.removeEventListener(OVERLAY_EVENT, onOverlayOpen as EventListener);
   }, []);
 
   useEffect(() => {
@@ -174,14 +188,20 @@ export function NotificationsTray({ mode = 'frontend' }: NotificationsTrayProps)
   const panelWidth = mode === 'admin' ? '24rem' : '22rem';
   const linkClass =
     mode === 'admin'
-      ? 'absolute right-0 top-[calc(100%+10px)] z-50'
-      : 'absolute right-0 top-[calc(100%+10px)] z-50';
+      ? 'absolute right-0 top-[calc(100%+10px)] z-50 w-[min(24rem,calc(100vw-1.25rem))]'
+      : 'fixed left-1/2 top-[5.95rem] z-50 w-[min(22rem,calc(100vw-1.25rem))] -translate-x-1/2 md:absolute md:right-0 md:left-auto md:top-[calc(100%+10px)] md:w-[22rem] md:translate-x-0';
 
   return (
     <div className="relative" ref={ref}>
       <button
         type="button"
-        onClick={() => setOpen((current) => !current)}
+        onClick={() => {
+          const nextOpen = !open;
+          if (nextOpen) {
+            window.dispatchEvent(new CustomEvent(OVERLAY_EVENT, { detail: { kind: 'notifications-tray' } }));
+          }
+          setOpen(nextOpen);
+        }}
         className="relative flex h-9 w-9 items-center justify-center rounded-full border border-epct-green/35 bg-white text-epct-dark transition hover:bg-epct-green hover:text-white dark:border-epct-lime/35 dark:text-epct-dark-text dark:hover:bg-epct-lime/20"
         aria-label="Notifications"
       >
@@ -194,10 +214,7 @@ export function NotificationsTray({ mode = 'frontend' }: NotificationsTrayProps)
       </button>
 
       {open ? (
-        <div
-          className={linkClass}
-          style={{ width: panelWidth }}
-        >
+        <div className={linkClass} style={{ maxWidth: panelWidth }}>
           <div className="overflow-hidden border border-epct-ink/10 bg-white shadow-[0_18px_40px_rgba(16,24,40,0.12)]">
             <div className="border-b border-epct-ink/10 px-4 py-3">
               <div className="flex items-start justify-between gap-3">

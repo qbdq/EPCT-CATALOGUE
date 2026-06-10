@@ -1,3 +1,4 @@
+import { cookies } from 'next/headers';
 import { SiteShell } from '@/components/site/SiteShell';
 import { CatalogueExplorer } from '@/components/catalogue/CatalogueExplorer';
 import Image from 'next/image';
@@ -11,6 +12,11 @@ import {
   getPublicTruckCategories,
   getPublicTruckModels,
 } from '@/lib/public-api';
+
+function resolveLocale(value: string | undefined): 'fr' | 'en' | 'ar' {
+  if (value === 'en' || value === 'ar') return value;
+  return 'fr';
+}
 
 export const metadata = {
   title: 'Catalogue | EPCT',
@@ -43,6 +49,8 @@ type CataloguePageProps = {
 };
 
 export default async function CataloguePage({ searchParams }: CataloguePageProps) {
+  const cookieStore = await cookies();
+  const locale = resolveLocale(cookieStore.get('site-locale')?.value);
   const resolvedSearchParams = (await searchParams) ?? {};
   const initialFilters = {
     brands: resolvedSearchParams.brand ? [resolvedSearchParams.brand] : [],
@@ -55,12 +63,12 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
   };
 
   const [products, brands, categories, truckCategories, truckModels, globalSettings] = await Promise.all([
-    getPublicProducts(),
-    getPublicBrands(),
-    getPublicCategories(),
-    getPublicTruckCategories(),
-    getPublicTruckModels(),
-    getPublicGlobalSettings(),
+    getPublicProducts({}, locale),
+    getPublicBrands(locale),
+    getPublicCategories(locale),
+    getPublicTruckCategories(locale),
+    getPublicTruckModels(locale),
+    getPublicGlobalSettings(locale),
   ]);
   const latestCataloguePDF =
     globalSettings?.cataloguePDFs

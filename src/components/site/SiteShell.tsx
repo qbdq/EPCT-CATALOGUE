@@ -1,14 +1,23 @@
 import type { ReactNode } from 'react';
+import { cookies } from 'next/headers';
 import { QuoteCartProvider } from '@/components/catalogue/QuoteCartContext';
-import { LocaleProvider } from './LocaleProvider';
+import { LocaleProvider, type SiteLocale } from './LocaleProvider';
 import { LenisProvider } from './LenisProvider';
 import { SiteFooter } from './SiteFooter';
 import { SiteHeader } from './SiteHeader';
 
-export function SiteShell({ children }: { children: ReactNode }) {
+function resolveInitialLocale(value: string | undefined): SiteLocale {
+  if (value === 'en' || value === 'ar') return value;
+  return 'fr';
+}
+
+export async function SiteShell({ children }: { children: ReactNode }) {
+  const cookieStore = await cookies();
+  const initialLocale = resolveInitialLocale(cookieStore.get('site-locale')?.value);
+
   return (
     <LenisProvider>
-      <LocaleProvider>
+      <LocaleProvider initialLocale={initialLocale}>
         <QuoteCartProvider>
           <div className="min-h-screen bg-epct-bg text-epct-ink">
             <SiteHeader />

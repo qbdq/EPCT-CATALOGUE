@@ -95,8 +95,8 @@ export function SiteFooter() {
 
   return (
     <footer className="w-full border-t border-epct-green/20 bg-epct-dark text-white">
-      <div className="mx-auto grid w-full max-w-7xl gap-10 px-5 py-14 md:grid-cols-2 md:px-10 lg:grid-cols-4">
-        <div className="lg:col-span-1">
+      <div className="mx-auto grid w-full max-w-7xl grid-cols-2 gap-8 px-5 py-14 md:grid-cols-2 md:px-10 lg:grid-cols-4">
+        <div className="col-span-2 lg:col-span-1">
           <div className="inline-flex rounded-xl bg-white px-5 py-4">
             <Image
               src="/img/elite_logo_full.png"

@@ -4,6 +4,7 @@ import { publicRead } from '../access/publicRead.ts';
 import { slugField } from '../fields/slug.ts';
 import { seoFields } from '../fields/seo.ts';
 import { onDocChange, onDocDelete } from '../hooks/revalidate.ts';
+import { resolveTranslatedFields } from '../hooks/resolveTranslatedFields.ts';
 
 export const Categories: CollectionConfig = {
   slug: 'categories',
@@ -12,8 +13,8 @@ export const Categories: CollectionConfig = {
     plural: 'Categories',
   },
   admin: {
-    useAsTitle: 'name',
-    defaultColumns: ['name', 'order'],
+    useAsTitle: 'name_fr',
+    defaultColumns: ['name_fr', 'order'],
     group: 'Catalogue',
     description: 'Product categories used to classify spare parts and catalogue items.',
   },
@@ -24,6 +25,7 @@ export const Categories: CollectionConfig = {
     delete: isAdmin,
   },
   hooks: {
+    afterRead: [resolveTranslatedFields(['name', 'description'])],
     afterChange: [onDocChange],
     afterDelete: [onDocDelete],
   },
@@ -34,8 +36,22 @@ export const Categories: CollectionConfig = {
         {
           label: 'Main info',
           fields: [
-            { name: 'name', type: 'text', required: true, localized: true, label: 'Category name' },
-            { name: 'description', type: 'textarea', localized: true, label: 'Short description' },
+            {
+              type: 'row',
+              fields: [
+                { name: 'name_fr', type: 'text', required: true, label: 'Nom FR', admin: { width: '33%' } },
+                { name: 'name_en', type: 'text', label: 'Nom EN', admin: { width: '33%' } },
+                { name: 'name_ar', type: 'text', label: 'Nom AR', admin: { width: '33%' } },
+              ],
+            },
+            {
+              type: 'row',
+              fields: [
+                { name: 'description_fr', type: 'textarea', label: 'Description FR', admin: { width: '33%' } },
+                { name: 'description_en', type: 'textarea', label: 'Description EN', admin: { width: '33%' } },
+                { name: 'description_ar', type: 'textarea', label: 'Description AR', admin: { width: '33%' } },
+              ],
+            },
             {
               name: 'order',
               type: 'number',

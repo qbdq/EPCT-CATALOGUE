@@ -110,7 +110,7 @@ export function BrandsReveal() {
               }}
               className="flex min-h-[60vh] items-center py-12 lg:h-[calc(100vh-5.7rem)] lg:py-0"
             >
-              <div className="w-full max-w-xl pr-4">
+              <div className="w-full max-w-xl pr-0 text-center lg:pr-4 lg:text-left">
                 <div className="mb-6 flex justify-center lg:hidden">
                   <div className="aspect-[4/3] w-full max-w-[320px] overflow-hidden rounded-2xl border border-epct-green/15 bg-gradient-to-br from-white to-epct-bg/40 shadow-lg">
                     <Image
@@ -156,33 +156,35 @@ export function BrandsReveal() {
                   {copy.specialty[i]}
                 </p>
 
-                <Link
-                  href={brand.href}
-                  className="mt-7 inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-wider text-epct-ink transition-opacity duration-300"
-                  style={{
-                    backgroundColor: '#A3E635',
-                    opacity: i === activeIndex ? 1 : 0,
-                    pointerEvents: i === activeIndex ? 'auto' : 'none',
-                  }}
-                >
-                  {copy.cta}
-                </Link>
+                <div className="mt-7 flex justify-center lg:justify-start">
+                  <Link
+                    href={brand.href}
+                    className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-sm font-semibold uppercase tracking-wider text-epct-ink transition-opacity duration-300"
+                    style={{
+                      backgroundColor: '#A3E635',
+                      opacity: i === activeIndex ? 1 : 0,
+                      pointerEvents: i === activeIndex ? 'auto' : 'none',
+                    }}
+                  >
+                    {copy.cta}
+                  </Link>
+                </div>
+
+                <div className="mt-6 flex justify-center gap-2 lg:hidden">
+                  {brands.map((_, dotIndex) => (
+                    <span
+                      key={dotIndex}
+                      className="block rounded-full transition-all duration-300"
+                      style={{
+                        width: dotIndex === activeIndex ? '1.25rem' : '0.4rem',
+                        height: '0.25rem',
+                        background: dotIndex === activeIndex ? '#1F7A4D' : 'rgba(0,0,0,0.2)',
+                      }}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
-          ))}
-        </div>
-
-        <div className="fixed bottom-6 left-1/2 z-40 flex -translate-x-1/2 gap-2 rounded-full bg-white/90 px-4 py-2 shadow-lg backdrop-blur lg:hidden">
-          {brands.map((_, i) => (
-            <span
-              key={i}
-              className="block rounded-full transition-all duration-300"
-              style={{
-                width: i === activeIndex ? '1.25rem' : '0.4rem',
-                height: '0.25rem',
-                background: i === activeIndex ? '#1F7A4D' : 'rgba(0,0,0,0.2)',
-              }}
-            />
           ))}
         </div>
 

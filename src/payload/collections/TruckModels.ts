@@ -4,13 +4,18 @@ import { publicRead } from '../access/publicRead.ts';
 import { slugField } from '../fields/slug.ts';
 import { seoFields } from '../fields/seo.ts';
 import { onDocChange, onDocDelete } from '../hooks/revalidate.ts';
+import { resolveTranslatedFields } from '../hooks/resolveTranslatedFields.ts';
 import UploadThumbnailCell from '../components/UploadThumbnailCell.tsx';
 
 export const TruckModels: CollectionConfig = {
   slug: 'truck-models',
+  labels: {
+    singular: 'Modele de camion',
+    plural: 'Modeles de camions',
+  },
   admin: {
-    useAsTitle: 'name',
-    defaultColumns: ['name', 'brand', 'truckCategory', 'active', 'image'],
+    useAsTitle: 'name_fr',
+    defaultColumns: ['name_fr', 'brand', 'truckCategory', 'active', 'image'],
     group: 'Catalogue',
     description: 'Specific machine models that belong to one brand and one truck category.',
   },
@@ -21,6 +26,7 @@ export const TruckModels: CollectionConfig = {
     delete: isAdmin,
   },
   hooks: {
+    afterRead: [resolveTranslatedFields(['name', 'description'])],
     afterChange: [onDocChange],
     afterDelete: [onDocDelete],
   },
@@ -32,11 +38,28 @@ export const TruckModels: CollectionConfig = {
           label: 'Main info',
           fields: [
             {
-              name: 'name',
-              type: 'text',
-              required: true,
-              localized: true,
-              label: 'Model name',
+              type: 'row',
+              fields: [
+                {
+                  name: 'name_fr',
+                  type: 'text',
+                  required: true,
+                  label: 'Nom FR',
+                  admin: { width: '33%' },
+                },
+                {
+                  name: 'name_en',
+                  type: 'text',
+                  label: 'Nom EN',
+                  admin: { width: '33%' },
+                },
+                {
+                  name: 'name_ar',
+                  type: 'text',
+                  label: 'Nom AR',
+                  admin: { width: '33%' },
+                },
+              ],
             },
             {
               type: 'row',
@@ -64,10 +87,27 @@ export const TruckModels: CollectionConfig = {
               ],
             },
             {
-              name: 'description',
-              type: 'textarea',
-              localized: true,
-              label: 'Short description',
+              type: 'row',
+              fields: [
+                {
+                  name: 'description_fr',
+                  type: 'textarea',
+                  label: 'Description FR',
+                  admin: { width: '33%' },
+                },
+                {
+                  name: 'description_en',
+                  type: 'textarea',
+                  label: 'Description EN',
+                  admin: { width: '33%' },
+                },
+                {
+                  name: 'description_ar',
+                  type: 'textarea',
+                  label: 'Description AR',
+                  admin: { width: '33%' },
+                },
+              ],
             },
           ],
         },

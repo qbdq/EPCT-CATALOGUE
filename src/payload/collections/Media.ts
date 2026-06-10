@@ -2,11 +2,40 @@ import type { CollectionConfig } from 'payload';
 import { isAdmin } from '../access/isAdmin.ts';
 import { publicRead } from '../access/publicRead.ts';
 
+const fallbackAltFromFilename = (filename?: string | null) => {
+  if (!filename) return undefined;
+
+  const baseName = filename.replace(/\.[^/.]+$/, '');
+  const normalized = baseName.replace(/[-_]+/g, ' ').replace(/\s+/g, ' ').trim();
+
+  return normalized || undefined;
+};
+
 export const Media: CollectionConfig = {
   slug: 'media',
   admin: {
     useAsTitle: 'alt',
     defaultColumns: ['filename', 'alt', 'updatedAt'],
+  },
+  hooks: {
+    beforeValidate: [
+      ({ data, req }) => {
+        if (!data) return data;
+
+        const filename =
+          typeof data.filename === 'string'
+            ? data.filename
+            : typeof req?.file?.name === 'string'
+              ? req.file.name
+              : undefined;
+
+        if (!data.alt) {
+          data.alt = fallbackAltFromFilename(filename) ?? 'Media upload';
+        }
+
+        return data;
+      },
+    ],
   },
   access: {
     read: publicRead,
@@ -16,27 +45,14 @@ export const Media: CollectionConfig = {
   },
   upload: {
     staticDir: 'media',
-    adminThumbnail: 'thumbnail',
-    imageSizes: [
-      {
-        name: 'thumbnail',
-        width: 300,
-        height: 300,
-      },
-      {
-        name: 'card',
-        width: 600,
-        height: 600,
-      },
-      {
-        name: 'hero',
-        width: 1600,
-        height: 900,
-      },
-    ],
+    focalPoint: false,
     mimeTypes: [
       'image/jpeg',
+      'image/jpg',
       'image/png',
+      'image/webp',
+      'image/gif',
+      'image/svg+xml',
       'application/pdf',
     ],
   },
@@ -45,9 +61,9 @@ export const Media: CollectionConfig = {
       name: 'alt',
       type: 'text',
       label: 'Alt text',
-      required: true,
       admin: {
-        description: 'Describe the image for accessibility and search engines.',
+        description:
+          'Describe the image for accessibility and search engines. If left empty, it will be generated from the filename.',
       },
     },
   ],

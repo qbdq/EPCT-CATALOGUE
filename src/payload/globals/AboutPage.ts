@@ -3,7 +3,7 @@ import { seoFields } from '../fields/seo.ts';
 
 export const AboutPage: GlobalConfig = {
   slug: 'about-page',
-  label: 'Site',
+  label: 'Parametres du site',
   access: {
     read: () => true,
     update: () => true,

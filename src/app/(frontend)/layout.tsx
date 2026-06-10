@@ -23,6 +23,11 @@ const mono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: 'EPCT',
   description: 'Pieces pour centrales et pompes a beton en Tunisie',
+  icons: {
+    icon: '/img/elite_logo.ico',
+    shortcut: '/img/elite_logo.ico',
+    apple: '/img/elite_logo.ico',
+  },
 };
 
 export default function FrontendLayout({ children }: { children: React.ReactNode }) {
