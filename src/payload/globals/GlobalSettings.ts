@@ -52,6 +52,25 @@ export const GlobalSettings: GlobalConfig = {
         },
       ],
     },
+    {
+      name: 'interactiveCatalogue',
+      type: 'group',
+      label: 'Catalogue interactif',
+      fields: [
+        {
+          name: 'publicationUrl',
+          type: 'text',
+          label: 'URL de publication',
+          defaultValue: 'https://www.calameo.com/books/008246200567eb680658d',
+        },
+        {
+          name: 'embedUrl',
+          type: 'text',
+          label: "URL d'integration",
+          defaultValue: 'https://v.calameo.com/?bkcode=008246200567eb680658d',
+        },
+      ],
+    },
     { name: 'defaultSeoTitle', type: 'text', localized: true },
     { name: 'defaultSeoDescription', type: 'textarea', localized: true },
   ],

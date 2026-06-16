@@ -1,6 +1,7 @@
 import { cookies } from 'next/headers';
 import { SiteShell } from '@/components/site/SiteShell';
 import { CatalogueExplorer } from '@/components/catalogue/CatalogueExplorer';
+import { InteractiveCatalogueButton } from '@/components/catalogue/InteractiveCatalogueButton';
 import Image from 'next/image';
 import { Mail, MessageCircle } from 'lucide-react';
 import {
@@ -18,9 +19,53 @@ function resolveLocale(value: string | undefined): 'fr' | 'en' | 'ar' {
   return 'fr';
 }
 
+const cataloguePageCopy = {
+  fr: {
+    eyebrow: 'Catalogue',
+    title: 'Recherche professionnelle de pieces',
+    description:
+      'Recherchez vos pieces par marque, categorie camion, modele, disponibilite ou code produit. Le catalogue a ete repense pour une lecture plus rapide et plus utile.',
+    downloadPdf: 'Telecharger le catalogue PDF',
+    interactive: 'Consulter le catalogue interactif',
+    closeInteractive: 'Fermer le catalogue interactif',
+    connected: 'Restons connectes',
+    connectedBody:
+      "Suivez l'activite EPCT, partagez une demande rapide ou contactez-nous directement pour vos pieces, pompes a beton, malaxeurs et equipements de centrale.",
+    email: 'Email',
+  },
+  en: {
+    eyebrow: 'Catalogue',
+    title: 'Professional parts search',
+    description:
+      'Search your parts by brand, truck category, model, availability, or product code. The catalogue has been redesigned for faster and more useful browsing.',
+    downloadPdf: 'Download the PDF catalogue',
+    interactive: 'Browse the interactive catalogue',
+    closeInteractive: 'Close interactive catalogue',
+    connected: 'Stay connected',
+    connectedBody:
+      'Follow EPCT activity, send a quick request, or contact us directly for your parts, concrete pumps, mixers, and batching plant equipment.',
+    email: 'Email',
+  },
+  ar: {
+    eyebrow: 'الكتالوج',
+    title: 'البحث الاحترافي عن القطع',
+    description:
+      'ابحث عن قطعك حسب العلامة التجارية وفئة الشاحنة والطراز والتوفر أو رمز المنتج. تمت إعادة تصميم الكتالوج ليكون أسرع وأكثر فائدة في التصفح.',
+    downloadPdf: 'تحميل كتالوج PDF',
+    interactive: 'تصفح الكتالوج التفاعلي',
+    closeInteractive: 'إغلاق الكتالوج التفاعلي',
+    connected: 'ابقوا على تواصل',
+    connectedBody:
+      'تابعوا نشاط EPCT، وأرسلوا طلبا سريعا، أو تواصلوا معنا مباشرة بخصوص قطع الغيار ومضخات الخرسانة والخلاطات ومعدات محطات الخرسانة.',
+    email: 'البريد الإلكتروني',
+  },
+} as const;
+
 export const metadata = {
   title: 'Catalogue | EPCT',
 };
+const DEFAULT_CALAMEO_PUBLICATION_URL = 'https://www.calameo.com/books/008246200567eb680658d';
+const DEFAULT_CALAMEO_EMBED_URL = 'https://v.calameo.com/?bkcode=008246200567eb680658d';
 
 function FacebookMark() {
   return (
@@ -51,6 +96,7 @@ type CataloguePageProps = {
 export default async function CataloguePage({ searchParams }: CataloguePageProps) {
   const cookieStore = await cookies();
   const locale = resolveLocale(cookieStore.get('site-locale')?.value);
+  const copy = cataloguePageCopy[locale];
   const resolvedSearchParams = (await searchParams) ?? {};
   const initialFilters = {
     brands: resolvedSearchParams.brand ? [resolvedSearchParams.brand] : [],
@@ -76,6 +122,10 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
       .reverse()
       .find((item) => !!getMediaUrl(item.file)) ?? null;
   const latestCataloguePDFUrl = getMediaUrl(latestCataloguePDF?.file);
+  const interactiveCatalogueUrl =
+    globalSettings?.interactiveCatalogue?.publicationUrl || DEFAULT_CALAMEO_PUBLICATION_URL;
+  const interactiveCatalogueEmbedUrl =
+    globalSettings?.interactiveCatalogue?.embedUrl || DEFAULT_CALAMEO_EMBED_URL;
 
   return (
     <SiteShell>
@@ -84,11 +134,11 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
           <section className="grid gap-4 border border-t-0 border-epct-ink/10 bg-white px-5 py-4 md:px-8 md:py-5 lg:grid-cols-[1fr_1fr] lg:items-center">
             <div className="max-w-4xl">
               <p className="font-display text-sm uppercase tracking-[0.18em] text-epct-green md:text-base">
-                Catalogue
+                {copy.eyebrow}
               </p>
               <div className="mt-2 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <h1 className="font-display text-2xl uppercase text-epct-dark md:text-3xl">
-                  Recherche professionnelle de pieces
+                  {copy.title}
                 </h1>
                 {latestCataloguePDFUrl ? (
                   <a
@@ -98,14 +148,21 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
                     download
                     className="inline-flex min-h-12 shrink-0 items-center justify-center bg-epct-green px-5 text-sm font-semibold uppercase tracking-[0.08em] text-white transition hover:brightness-95"
                   >
-                    Telecharger le catalogue PDF
+                    {copy.downloadPdf}
                   </a>
                 ) : null}
               </div>
               <p className="mt-2 text-sm leading-relaxed text-epct-ink/75 md:text-[15px]">
-                Recherchez vos pieces par marque, categorie camion, modele, disponibilite ou code
-                produit. Le catalogue a ete repense pour une lecture plus rapide et plus utile.
+                {copy.description}
               </p>
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <InteractiveCatalogueButton
+                  buttonLabel={copy.interactive}
+                  closeLabel={copy.closeInteractive}
+                  publicationUrl={interactiveCatalogueUrl}
+                  embedUrl={interactiveCatalogueEmbedUrl}
+                />
+              </div>
             </div>
 
             <div className="relative aspect-[16/8] overflow-hidden bg-neutral-100">
@@ -128,6 +185,7 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
               categories={categories}
               truckCategories={truckCategories}
               truckModels={truckModels}
+              locale={locale}
               initialFilters={initialFilters}
             />
           </section>
@@ -136,12 +194,10 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
             <div className="grid gap-5">
               <div>
                 <p className="font-display text-2xl uppercase text-epct-dark">
-                  Restons connectes
+                  {copy.connected}
                 </p>
                 <p className="mt-2 text-sm leading-relaxed text-epct-ink/68 md:text-base">
-                  Suivez l'activite EPCT, partagez une demande rapide ou contactez-nous
-                  directement pour vos pieces, pompes a beton, malaxeurs et equipements de
-                  centrale.
+                  {copy.connectedBody}
                 </p>
               </div>
 
@@ -168,7 +224,7 @@ export default async function CataloguePage({ searchParams }: CataloguePageProps
                   <span className="flex h-8 w-8 items-center justify-center bg-epct-green/10 text-epct-green">
                     <Mail className="h-4 w-4" />
                   </span>
-                  Email
+                  {copy.email}
                 </a>
               ) : null}
 

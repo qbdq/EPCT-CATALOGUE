@@ -133,6 +133,10 @@ export type PublicGlobalSettings = {
     file?: MediaDoc | string | null;
     title?: string;
   }>;
+  interactiveCatalogue?: {
+    publicationUrl?: string;
+    embedUrl?: string;
+  };
 };
 
 export type ProductFilters = {

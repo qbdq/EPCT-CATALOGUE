@@ -21,6 +21,7 @@ import {
   type PublicTruckModel,
   getMediaUrl,
 } from '@/lib/public-api';
+import type { SiteLocale } from '@/components/site/LocaleProvider';
 import { ProtectedImage } from '@/components/media/ProtectedImage';
 
 type CatalogueExplorerProps = {
@@ -29,6 +30,7 @@ type CatalogueExplorerProps = {
   categories: PublicCategory[];
   truckCategories: PublicTruckCategory[];
   truckModels: PublicTruckModel[];
+  locale: SiteLocale;
   initialFilters?: {
     brands?: string[];
     productCategories?: string[];
@@ -41,11 +43,125 @@ type CatalogueExplorerProps = {
 
 const PRODUCTS_PER_PAGE = 12;
 
-const stockMeta: Record<string, { label: string; className: string }> = {
-  'in-stock': { label: 'En stock', className: 'bg-emerald-600 text-white' },
-  'out-of-stock': { label: 'Rupture de stock', className: 'bg-red-600 text-white' },
-  'on-order': { label: 'Sur commande', className: 'bg-orange-500 text-white' },
-};
+const catalogueCopy = {
+  fr: {
+    filters: 'Filtres',
+    search: 'Recherche',
+    searchPlaceholder: 'Nom, description, code...',
+    brands: 'Marques',
+    truckCategories: 'Categories camion',
+    productCategories: 'Categories produits',
+    truckModels: 'Modeles camion',
+    availability: 'Disponibilite',
+    select: 'Selectionner',
+    searchDropdown: 'Recherche',
+    noAvailableValues: 'Aucune valeur disponible.',
+    noActiveFilters: 'Aucun filtre actif pour le moment.',
+    resetFilters: 'Reinitialiser les filtres',
+    hideFilters: 'Masquer les filtres',
+    showFilters: 'Afficher les filtres',
+    refineMobile: 'Affinez votre recherche mobile',
+    closeFilters: 'Fermer les filtres',
+    close: 'Fermer',
+    kanban: 'Kanban',
+    list: 'Liste',
+    image: 'Image',
+    title: 'Titre',
+    reference: 'Reference',
+    brand: 'Marque',
+    truckCategory: 'Categorie camion',
+    previous: 'Precedent',
+    next: 'Suivant',
+    noProducts: 'Aucun produit ne correspond aux filtres choisis.',
+    selection: 'selection',
+    selections: 'selections',
+    ref: 'Ref.',
+    inStock: 'En stock',
+    outOfStock: 'Rupture de stock',
+    onOrder: 'Sur commande',
+  },
+  en: {
+    filters: 'Filters',
+    search: 'Search',
+    searchPlaceholder: 'Name, description, code...',
+    brands: 'Brands',
+    truckCategories: 'Truck categories',
+    productCategories: 'Product categories',
+    truckModels: 'Truck models',
+    availability: 'Availability',
+    select: 'Select',
+    searchDropdown: 'Search',
+    noAvailableValues: 'No available values.',
+    noActiveFilters: 'No active filters at the moment.',
+    resetFilters: 'Reset filters',
+    hideFilters: 'Hide filters',
+    showFilters: 'Show filters',
+    refineMobile: 'Refine your mobile search',
+    closeFilters: 'Close filters',
+    close: 'Close',
+    kanban: 'Kanban',
+    list: 'List',
+    image: 'Image',
+    title: 'Title',
+    reference: 'Reference',
+    brand: 'Brand',
+    truckCategory: 'Truck category',
+    previous: 'Previous',
+    next: 'Next',
+    noProducts: 'No products match the selected filters.',
+    selection: 'selection',
+    selections: 'selections',
+    ref: 'Ref.',
+    inStock: 'In stock',
+    outOfStock: 'Out of stock',
+    onOrder: 'On order',
+  },
+  ar: {
+    filters: 'الفلاتر',
+    search: 'بحث',
+    searchPlaceholder: 'الاسم، الوصف، الرمز...',
+    brands: 'العلامات التجارية',
+    truckCategories: 'فئات الشاحنات',
+    productCategories: 'فئات المنتجات',
+    truckModels: 'طرازات الشاحنات',
+    availability: 'التوفر',
+    select: 'اختر',
+    searchDropdown: 'بحث',
+    noAvailableValues: 'لا توجد قيم متاحة.',
+    noActiveFilters: 'لا توجد فلاتر مفعلة حاليا.',
+    resetFilters: 'إعادة تعيين الفلاتر',
+    hideFilters: 'إخفاء الفلاتر',
+    showFilters: 'إظهار الفلاتر',
+    refineMobile: 'حسّن بحثك على الهاتف',
+    closeFilters: 'إغلاق الفلاتر',
+    close: 'إغلاق',
+    kanban: 'بطاقات',
+    list: 'قائمة',
+    image: 'الصورة',
+    title: 'العنوان',
+    reference: 'المرجع',
+    brand: 'العلامة',
+    truckCategory: 'فئة الشاحنة',
+    previous: 'السابق',
+    next: 'التالي',
+    noProducts: 'لا توجد منتجات تطابق الفلاتر المحددة.',
+    selection: 'اختيار',
+    selections: 'اختيارات',
+    ref: 'المرجع',
+    inStock: 'متوفر',
+    outOfStock: 'نفد المخزون',
+    onOrder: 'حسب الطلب',
+  },
+} as const;
+
+function getStockMeta(locale: SiteLocale): Record<string, { label: string; className: string }> {
+  const copy = catalogueCopy[locale];
+  return {
+    'in-stock': { label: copy.inStock, className: 'bg-emerald-600 text-white' },
+    'out-of-stock': { label: copy.outOfStock, className: 'bg-red-600 text-white' },
+    'on-order': { label: copy.onOrder, className: 'bg-orange-500 text-white' },
+  };
+}
 
 function getRelationSlug(relation?: { slug?: string } | string | null) {
   return typeof relation === 'string' ? relation : relation?.slug;
@@ -103,6 +219,7 @@ function matchesSelectedMany(
 }
 
 type FilterPickerProps<T extends { id: string; name: string; slug: string }> = {
+  copy: (typeof catalogueCopy)[SiteLocale];
   pickerKey: string;
   openPicker: string | null;
   setOpenPicker: (value: string | null) => void;
@@ -116,6 +233,7 @@ type FilterPickerProps<T extends { id: string; name: string; slug: string }> = {
 };
 
 function FilterPicker<T extends { id: string; name: string; slug: string }>({
+  copy,
   pickerKey,
   openPicker,
   setOpenPicker,
@@ -141,7 +259,7 @@ function FilterPicker<T extends { id: string; name: string; slug: string }>({
       >
         <p className="truncate text-sm text-epct-dark/82">
           {selectedValues.length
-            ? `${selectedValues.length} selection${selectedValues.length > 1 ? 's' : ''}`
+            ? `${selectedValues.length} ${selectedValues.length > 1 ? copy.selections : copy.selection}`
             : placeholder}
         </p>
         <ChevronDown
@@ -166,7 +284,7 @@ function FilterPicker<T extends { id: string; name: string; slug: string }>({
                   type="search"
                   value={searchValue}
                   onChange={(event) => onSearchChange(event.target.value)}
-                  placeholder="Recherche"
+                  placeholder={copy.searchDropdown}
                   className="h-10 w-full rounded-sm border border-epct-ink/10 bg-[#fcfcfb] pl-10 pr-3 text-sm outline-none transition focus:border-epct-green"
                 />
               </label>
@@ -204,7 +322,7 @@ function FilterPicker<T extends { id: string; name: string; slug: string }>({
                   );
                 })
               ) : (
-                <div className="px-3 py-4 text-sm text-epct-ink/55">Aucune valeur disponible.</div>
+                <div className="px-3 py-4 text-sm text-epct-ink/55">{copy.noAvailableValues}</div>
               )}
             </div>
           </div>
@@ -220,8 +338,11 @@ export function CatalogueExplorer({
   categories,
   truckCategories,
   truckModels,
+  locale,
   initialFilters,
 }: CatalogueExplorerProps) {
+  const copy = catalogueCopy[locale];
+  const stockMeta = getStockMeta(locale);
   const [query, setQuery] = useState(initialFilters?.query ?? '');
   const [selectedBrands, setSelectedBrands] = useState<string[]>(initialFilters?.brands ?? []);
   const [selectedProductCategories, setSelectedProductCategories] = useState<string[]>(
@@ -563,11 +684,12 @@ export function CatalogueExplorer({
   const filtersContent = (
     <div className="grid gap-4 lg:grid-cols-[repeat(4,minmax(0,1fr))_1.15fr] lg:items-start">
       <FilterPicker
+        copy={copy}
         pickerKey="brands"
         openPicker={openFilterPicker}
         setOpenPicker={setOpenFilterPicker}
-        title="Marques"
-        placeholder="Selectionner"
+        title={copy.brands}
+        placeholder={copy.select}
         options={filterableBrands}
         selectedValues={selectedBrands}
         searchValue={brandQuery}
@@ -576,11 +698,12 @@ export function CatalogueExplorer({
       />
 
       <FilterPicker
+        copy={copy}
         pickerKey="truck-categories"
         openPicker={openFilterPicker}
         setOpenPicker={setOpenFilterPicker}
-        title="Categories camion"
-        placeholder="Selectionner"
+        title={copy.truckCategories}
+        placeholder={copy.select}
         options={visibleCategories}
         selectedValues={selectedCategories}
         searchValue={truckCategoryQuery}
@@ -589,11 +712,12 @@ export function CatalogueExplorer({
       />
 
       <FilterPicker
+        copy={copy}
         pickerKey="product-categories"
         openPicker={openFilterPicker}
         setOpenPicker={setOpenFilterPicker}
-        title="Categories produits"
-        placeholder="Selectionner"
+        title={copy.productCategories}
+        placeholder={copy.select}
         options={visibleProductCategories}
         selectedValues={selectedProductCategories}
         searchValue={productCategoryQuery}
@@ -607,8 +731,9 @@ export function CatalogueExplorer({
         pickerKey="models"
         openPicker={openFilterPicker}
         setOpenPicker={setOpenFilterPicker}
-        title="Modeles camion"
-        placeholder="Selectionner"
+        copy={copy}
+        title={copy.truckModels}
+        placeholder={copy.select}
         options={visibleModels}
         selectedValues={selectedModels}
         searchValue={modelQuery}
@@ -618,7 +743,7 @@ export function CatalogueExplorer({
 
       <div className="grid gap-3 rounded-sm border border-epct-ink/10 bg-[#fcfcfb] px-4 py-3">
         <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-epct-ink/62">
-          Disponibilite
+{copy.availability}
         </p>
         <div className="grid gap-2 pt-1">
           {Object.entries(stockMeta).map(([value, meta]) => (
@@ -656,7 +781,7 @@ export function CatalogueExplorer({
                   </button>
                 ))
               ) : filtersExpanded ? (
-                <p className="text-sm text-epct-ink/55">Aucun filtre actif pour le moment.</p>
+                <p className="text-sm text-epct-ink/55">{copy.noActiveFilters}</p>
               ) : null}
             </div>
 
@@ -665,7 +790,7 @@ export function CatalogueExplorer({
                 type="button"
                 onClick={resetFilters}
                 className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-red-200 bg-red-50 text-[#b42318] transition hover:bg-red-100"
-                aria-label="Reinitialiser les filtres"
+                aria-label={copy.resetFilters}
               >
                 <X className="h-4 w-4" />
               </button>
@@ -679,7 +804,7 @@ export function CatalogueExplorer({
           <div className="grid gap-3 lg:grid-cols-[minmax(0,1.6fr)_auto] lg:items-end">
             <div className="min-w-0">
               <p className="mb-2 text-[11px] font-semibold uppercase tracking-[0.16em] text-epct-ink/62">
-                Recherche
+                {copy.search}
               </p>
               <label className="relative block">
                 <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-epct-ink/40" />
@@ -687,7 +812,7 @@ export function CatalogueExplorer({
                   type="search"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Nom, description, code..."
+                  placeholder={copy.searchPlaceholder}
                   className="h-12 w-full rounded-sm border border-epct-ink/10 bg-[#fcfcfb] pl-10 pr-3 text-sm text-epct-dark outline-none transition placeholder:text-epct-ink/40 focus:border-epct-green"
                 />
               </label>
@@ -701,7 +826,7 @@ export function CatalogueExplorer({
                 className="inline-flex h-12 items-center gap-2 rounded-sm border border-epct-ink/10 bg-[#fcfcfb] px-4 text-sm font-semibold text-epct-dark transition hover:border-epct-green/35 hover:text-epct-green"
               >
                 <SlidersHorizontal className="h-4 w-4" />
-                <span>{filtersExpanded ? 'Masquer les filtres' : 'Afficher les filtres'}</span>
+                <span>{filtersExpanded ? copy.hideFilters : copy.showFilters}</span>
                 <ChevronDown
                   className={`h-4 w-4 transition ${filtersExpanded ? 'rotate-180' : ''}`}
                 />
@@ -716,7 +841,7 @@ export function CatalogueExplorer({
               className="inline-flex h-11 items-center gap-2 rounded-sm border border-epct-ink/10 bg-[#fcfcfb] px-4 text-sm font-semibold text-epct-dark transition hover:border-epct-green/35 hover:text-epct-green"
             >
               <SlidersHorizontal className="h-4 w-4" />
-              <span>Filtres</span>
+              <span>{copy.filters}</span>
               {hasActiveSelectionFilters ? (
                 <span className="inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-epct-green px-1 text-[10px] font-bold text-white">
                   {activeFilterTags.length}
@@ -753,9 +878,9 @@ export function CatalogueExplorer({
             <div className="flex items-center justify-between border-b border-epct-ink/10 px-5 py-4">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-epct-green">
-                  Filtres
+                  {copy.filters}
                 </p>
-                <p className="mt-1 text-sm text-epct-ink/62">Affinez votre recherche mobile</p>
+                <p className="mt-1 text-sm text-epct-ink/62">{copy.refineMobile}</p>
               </div>
               <div className="flex items-center gap-2">
                 {hasActiveSelectionFilters ? (
@@ -763,7 +888,7 @@ export function CatalogueExplorer({
                     type="button"
                     onClick={resetFilters}
                     className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-red-200 bg-red-50 text-[#b42318]"
-                    aria-label="Reinitialiser les filtres"
+                    aria-label={copy.resetFilters}
                   >
                     <RotateCcw className="h-4 w-4" />
                   </button>
@@ -772,7 +897,7 @@ export function CatalogueExplorer({
                   type="button"
                   onClick={closeMobileFilters}
                   className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-epct-ink/10 bg-white text-epct-dark"
-                  aria-label="Fermer"
+                  aria-label={copy.close}
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -801,7 +926,7 @@ export function CatalogueExplorer({
                   }`}
                 >
                   <LayoutGrid className="h-4 w-4" />
-                  Kanban
+                  {copy.kanban}
                 </button>
                 <button
                   type="button"
@@ -813,7 +938,7 @@ export function CatalogueExplorer({
                   }`}
                 >
                   <List className="h-4 w-4" />
-                  Liste
+                  {copy.list}
                 </button>
               </div>
             </div>
@@ -886,7 +1011,7 @@ export function CatalogueExplorer({
                         </div>
 
                         <p className="text-sm font-semibold uppercase tracking-[0.08em] text-epct-green/85">
-                          Ref. {product.reference}
+                          {copy.ref} {product.reference}
                         </p>
 
                         <p className="text-sm leading-6 text-epct-ink/72">
@@ -900,12 +1025,12 @@ export function CatalogueExplorer({
             ) : (
               <div className="-mx-5 overflow-hidden border-y border-epct-ink/10 bg-white md:-mx-8">
                 <div className="hidden grid-cols-[140px_1.4fr_0.9fr_1.1fr_1.05fr_0.95fr] gap-4 border-b border-epct-ink/10 bg-[#f8f8f6] px-5 py-3 text-[11px] font-semibold uppercase tracking-[0.14em] text-epct-ink/58 lg:grid">
-                  <span>Image</span>
-                  <span>Titre</span>
-                  <span>Reference</span>
-                  <span>Marque</span>
-                  <span>Categorie camion</span>
-                  <span>Disponibilite</span>
+                  <span>{copy.image}</span>
+                  <span>{copy.title}</span>
+                  <span>{copy.reference}</span>
+                  <span>{copy.brand}</span>
+                  <span>{copy.truckCategory}</span>
+                  <span>{copy.availability}</span>
                 </div>
 
                 <div className="grid">
@@ -940,7 +1065,7 @@ export function CatalogueExplorer({
 
                         <div className="grid gap-1">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-epct-ink/48 lg:hidden">
-                            Titre
+                            {copy.title}
                           </p>
                           <p className="font-display text-lg uppercase leading-tight text-epct-dark">
                             {product.name}
@@ -949,30 +1074,30 @@ export function CatalogueExplorer({
 
                         <div className="grid gap-1 text-sm text-epct-ink/75">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-epct-ink/48 lg:hidden">
-                            Reference
+                            {copy.reference}
                           </p>
                           <p className="font-semibold uppercase tracking-[0.08em] text-epct-green/85">
-                            Ref. {product.reference}
+                          {copy.ref} {product.reference}
                           </p>
                         </div>
 
                         <div className="grid gap-1 text-sm text-epct-ink/75">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-epct-ink/48 lg:hidden">
-                            Marque
+                            {copy.brand}
                           </p>
                           <p>{brandLabels.length ? brandLabels.join(', ') : '-'}</p>
                         </div>
 
                         <div className="grid gap-1 text-sm text-epct-ink/75">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-epct-ink/48 lg:hidden">
-                            Categorie camion
+                            {copy.truckCategory}
                           </p>
                           <p>{truckCategoryLabel}</p>
                         </div>
 
                         <div className="grid gap-1 text-sm text-epct-ink/75">
                           <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-epct-ink/48 lg:hidden">
-                            Disponibilite
+                            {copy.availability}
                           </p>
                           {stock ? (
                             <span
@@ -998,7 +1123,7 @@ export function CatalogueExplorer({
                 disabled={currentPage === 1}
                 className="inline-flex min-h-10 items-center justify-center border border-epct-ink/10 bg-white px-4 text-sm font-semibold text-epct-dark transition hover:bg-[#f8f8f6] disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Precedent
+                {copy.previous}
               </button>
               {Array.from({ length: totalPages }, (_, index) => index + 1).map((page) => (
                 <button
@@ -1020,13 +1145,13 @@ export function CatalogueExplorer({
                 disabled={currentPage === totalPages}
                 className="inline-flex min-h-10 items-center justify-center border border-epct-ink/10 bg-white px-4 text-sm font-semibold text-epct-dark transition hover:bg-[#f8f8f6] disabled:cursor-not-allowed disabled:opacity-40"
               >
-                Suivant
+                {copy.next}
               </button>
             </div>
           </>
         ) : (
           <div className="border border-dashed border-epct-green/35 bg-white px-6 py-14 text-center text-epct-ink/70">
-            Aucun produit ne correspond aux filtres choisis.
+            {copy.noProducts}
           </div>
         )}
       </section>
